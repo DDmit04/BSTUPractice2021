@@ -2,6 +2,7 @@
 using System.IO;
 using Program.Controller;
 using Program.Controller.interfaces;
+using Program.Exceptions.collection;
 using Program.userInterface;
 using Program.Utils;
 
@@ -48,9 +49,13 @@ namespace Program
             return dataUnits;
         }
 
-        public void SaveDataUnit(string collectionId, DataUnit dataUnit)
+        public DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit)
         {
-            DataUnitRepository.SaveDataUnit(collectionId, dataUnit);
+            return DataUnitRepository.SaveDataUnit(collectionId, dataUnit);
+        }
+        public DataUnit CreateDataUnit(string collectionId)
+        {
+            return DataUnitRepository.CreateDataUnit(collectionId);
         }
 
         public void DeleteDataUnit(string collectionId, string dataUnitId)
@@ -63,39 +68,32 @@ namespace Program
             return CollectionDefinitionRepository.LoadCollectionDefinitions();
         }
 
-        public void SaveCollection(CollectionDefinition collectionDefinition)
+        public CollectionDefinition RenameCollection(string collectionId, string newCollectionName)
         {
-            var oldColDef = CollectionDefinitionRepository.SaveCollection(collectionDefinition);
-            try
+            var oldColDef = CollectionDefinitionRepository.LoadCollectionDefinitions()
+                .Find(def => def.Id == collectionId);
+            if (oldColDef != null)
             {
-                IndexRepository.CreateIndex(collectionDefinition.Id);
+                oldColDef.Name = newCollectionName;
+                var savedDefinition = CollectionDefinitionRepository.SaveCollection(oldColDef);
+                return savedDefinition;
             }
-            catch
-            {
-                if (oldColDef != null)
-                {
-                    CollectionDefinitionRepository.SaveCollection(oldColDef);
-                }
-                else
-                {
-                    CollectionDefinitionRepository.DeleteCollection(collectionDefinition.Id);
-                }
-                throw;
-            }
+            throw CollectionNotFoundException.GenerateException(collectionId);
         }
 
-        public void CreateCollection(CollectionDefinition collectionDefinition)
+        public CollectionDefinition CreateCollection(string collectionName)
         {
-            CollectionDefinitionRepository.CreateCollection(collectionDefinition);
+            var savedCollection = CollectionDefinitionRepository.CreateCollection(collectionName);
             try
             {
-                IndexRepository.CreateIndex(collectionDefinition.Id);
+                IndexRepository.CreateIndex(savedCollection.Id);
             }
             catch
             {
-                CollectionDefDataSource.DeleteCollection(collectionDefinition.Id);
+                CollectionDefDataSource.DeleteCollection(savedCollection.Id);
                 throw;
             }
+            return savedCollection;
         }
 
         public void DeleteCollection(string collectionId)
@@ -107,7 +105,7 @@ namespace Program
             }
             catch
             {
-                CollectionDefinitionRepository.CreateCollection(deletedCollection);
+                CollectionDefinitionRepository.SaveCollection(deletedCollection);
                 throw;
             }
         }

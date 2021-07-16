@@ -31,19 +31,24 @@ namespace Program.userInterface
         public void SaveCollectionDefinition(CollectionDefinition collectionDefinition)
         {
             var definitions = LoadCollectionDefinitions();
-            var collectionToSave = definitions.Find(def => def.Id == collectionDefinition.Id);
-            if (collectionToSave == null)
+            var existedCollection = definitions.Find(def => def.Id == collectionDefinition.Id);
+            if (existedCollection == null)
             {
                 definitions.Add(collectionDefinition);
             }
             else
             {
-                definitions.Remove(collectionToSave);
+                definitions.Remove(existedCollection);
                 definitions.Add(collectionDefinition);
             }
             RewriteCollectionDefinitions(definitions);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="collectionId"></param>
+        /// <returns>Удалённая яколлекция</returns>
+        /// <exception cref="CollectionNotFoundException"></exception>
         public CollectionDefinition DeleteCollection(string collectionId)
         {
             var definitions = LoadCollectionDefinitions();

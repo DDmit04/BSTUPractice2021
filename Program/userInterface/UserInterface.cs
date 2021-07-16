@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Program.Controller.interfaces;
 using Program.DataPage;
-using Program.FileSystem.Utils;
 
 namespace Program.userInterface
 {
@@ -18,22 +17,19 @@ namespace Program.userInterface
 
         public List<CollectionDefinition> GetCollectionDefinitions()
         {
-            return MainRepo.LoadCollectionDefinitions();
+            var definitions = MainRepo.LoadCollectionDefinitions();
+            definitions.Sort((firstDef, secDef) => firstDef.CreationDate.CompareTo(secDef.CreationDate));
+            return definitions;
         }
 
         public CollectionDefinition CreateCollection(string collectionName)
         {
-            var id = IdUtils.GenerateId();
-            var colDef = new CollectionDefinition(id, collectionName, 0);
-            MainRepo.CreateCollection(colDef);
-            return colDef;
+            return MainRepo.CreateCollection(collectionName);
         }
 
         public CollectionDefinition RenameCollection(string collectionId, string newName)
         {
-            var colDef = new CollectionDefinition(collectionId, newName, 0);
-            MainRepo.SaveCollection(colDef);
-            return colDef;
+            return MainRepo.RenameCollection(collectionId, newName);
         }
 
         public void DeleteCollection(string collectionId)
@@ -51,16 +47,12 @@ namespace Program.userInterface
 
         public DataUnit AddDataUnit(string collectionId)
         {
-            var id = IdUtils.GenerateId();
-            var dataUnit = new DataUnit(id);
-            MainRepo.SaveDataUnit(collectionId, dataUnit);
-            return dataUnit;
+            return MainRepo.CreateDataUnit(collectionId);
         }
 
         public DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit)
         {
-            MainRepo.SaveDataUnit(collectionId, dataUnit);
-            return dataUnit;
+            return MainRepo.UpdateDataUnit(collectionId, dataUnit);
         }
 
         public void DeleteDataUnit(string collectionId, string dataUnitId)

@@ -6,7 +6,7 @@ namespace Program.Controller.interfaces
     {
         public List<CollectionDefinition> LoadCollectionDefinitions();
         public CollectionDefinition SaveCollection(CollectionDefinition collectionDefinition);
-        public void CreateCollection(CollectionDefinition collectionDefinition);
+        public CollectionDefinition CreateCollection(string collectionName);
         public CollectionDefinition DeleteCollection(string collectionId);
     }
 }

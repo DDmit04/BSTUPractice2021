@@ -51,7 +51,6 @@ namespace Program
             {
                 indexToDivide.Divide();
             }
-
             DataUnitIndexDataSource.UpdateIndexFile(index);
             return indexToDivide;
         }

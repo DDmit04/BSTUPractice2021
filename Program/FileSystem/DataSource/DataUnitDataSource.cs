@@ -9,15 +9,27 @@ namespace Program
 {
     public class DataUnitDataSource : IDataUnitDataSource
     {
-        public void DivideIndexDataByTwo(string oldIndexFilepath, string newLeftIndexPath, string newRightIndexPath,
-            string divideId)
+        public void DivideIndexDataByTwo(string oldIndexFilepath, string newLeftIndexPath, string newRightIndexPath)
         {
             var dataUnits = LoadDataUnitsFromFile(oldIndexFilepath);
-            var loverUnits = dataUnits.Where(unit => String.Compare(unit.Id, divideId, StringComparison.Ordinal) < 0);
-            var upperUnits = dataUnits.Where(unit => String.Compare(unit.Id, divideId, StringComparison.Ordinal) >= 0);
-
-            RewriteDataUnitsToFile(newLeftIndexPath, new List<DataUnit>(loverUnits));
-            RewriteDataUnitsToFile(newRightIndexPath, new List<DataUnit>(upperUnits));
+            dataUnits.Sort((firstUnit, secUnit) => String.Compare(firstUnit.Id, secUnit.Id, StringComparison.Ordinal));
+            var loverUnits = new List<DataUnit>();
+            var upperUnits = new List<DataUnit>();
+            var counter = 0;
+            foreach (var unit in dataUnits)
+            {
+                if (counter < dataUnits.Count / 2)
+                {
+                    loverUnits.Add(unit);
+                }
+                else
+                {
+                    upperUnits.Add(unit);
+                }
+                counter++;
+            }
+            RewriteDataUnitsToFile(newLeftIndexPath, loverUnits);
+            RewriteDataUnitsToFile(newRightIndexPath, upperUnits);
             DirUtils.DeleteFile(oldIndexFilepath);
         }
         
@@ -52,13 +64,7 @@ namespace Program
             throw new FileNotFoundException($"No file {filepath} found for loading data units!");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="filepath"></param>
-        /// <param name="dataUnit"></param>
-        /// <returns>Запись сохранена как новая</returns>
-        public bool SaveDataUnit(string filepath, DataUnit dataUnit)
+        public DataUnit SaveDataUnit(string filepath, DataUnit dataUnit)
         {
             var dataUnits = LoadDataUnitsFromFile(filepath);
             var dataUnitToSave = dataUnits.Find(unit => unit.Id == dataUnit.Id);
@@ -67,13 +73,12 @@ namespace Program
                 dataUnits.Remove(dataUnitToSave);
                 dataUnits.Add(dataUnit);
                 RewriteDataUnitsToFile(filepath, dataUnits);
-                return false;
             }
             else
             {
                 AppendDataUnitToFile(filepath, dataUnit);
-                return true;
             }
+            return dataUnit;
         }
 
         /// <summary>

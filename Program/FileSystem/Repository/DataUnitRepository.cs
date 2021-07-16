@@ -47,37 +47,41 @@ namespace Program.Controller
             return dataUnits;
         }
 
-        public void SaveDataUnit(string collectionId, DataUnit dataUnit)
+        public DataUnit SaveDataUnit(string collectionId, DataUnit dataUnit)
         {
             var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnit.Id);
-            var dataUnitSavedAsNew = DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
-            if (dataUnitSavedAsNew)
+            return DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
+        }
+        public DataUnit CreateDataUnit(string collectionId)
+        {
+            var id = IdUtils.GenerateId();
+            var dataUnit = new DataUnit(id);
+            var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnit.Id);
+            var savedDataUnit = DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
+            try
             {
-                try
+                IndexRepository.MakeBackupOfIndex(collectionId);
+                var indexToDivide = IndexRepository.AddDataUnit(collectionId, dataUnit.Id);
+                if (indexToDivide != null)
                 {
-                    IndexRepository.MakeBackupOfIndex(collectionId);
-                    var indexToDivide = IndexRepository.AddDataUnit(collectionId, dataUnit.Id);
-                    if (indexToDivide != null)
+                    try
                     {
-                        try
-                        {
-                            DivideIndexByTwo(indexToDivide);
-                        }
-                        catch
-                        {
-                            IndexRepository.LoadBackupOfIndex(collectionId);
-                            throw;
-                        }
+                        DivideIndexByTwo(indexToDivide);
+                    }
+                    catch
+                    {
+                        IndexRepository.LoadBackupOfIndex(collectionId);
+                        throw;
                     }
                 }
-                catch
-                {
-                    DataUnitDataSource.DeleteDataUnit(filepath, dataUnit.Id);
-                    throw;
-                }
             }
+            catch
+            {
+                DataUnitDataSource.DeleteDataUnit(filepath, dataUnit.Id);
+                throw;
+            }
+            return savedDataUnit;
         }
-
         public void DeleteDataUnit(string collectionId, string dataUnitId)
         {
             var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnitId);
@@ -128,6 +132,7 @@ namespace Program.Controller
                 throw;
             }
         }
+
         protected List<DataUnit> GetAllCollectionDataUnits(string collectionId)
         {
             var dataUnits = new List<DataUnit>();
@@ -154,11 +159,10 @@ namespace Program.Controller
         }
         protected void DivideIndexByTwo(IdIndex indexToDivide)
         {
-            var midId = IdUtils.SubIds(indexToDivide.Right.GetRealMaxId(), indexToDivide.Left.GetRealMinId());
             var dataFilepath = indexToDivide.GetFilepath();
             var leftFilepath = indexToDivide.Left.GetFilepath();
             var rightFilepath = indexToDivide.Right.GetFilepath();
-            DataUnitDataSource.DivideIndexDataByTwo(dataFilepath, leftFilepath, rightFilepath, midId);
+            DataUnitDataSource.DivideIndexDataByTwo(dataFilepath, leftFilepath, rightFilepath);
         }
 
         protected void UniteTwoIndex(IdIndex indexToUnite)

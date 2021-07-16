@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Program.Exceptions;
 using Program.FileSystem.Utils;
 using Program.Utils;
@@ -70,32 +69,13 @@ namespace Program
             Right = null;
         }
 
-        public string GetRealMaxId()
-        {
-            if (IsLeaf)
-            {
-                return IdList.Max();
-            }
-            throw IndexLeafException.GenerateException(this);
-        }
-
-        public string GetRealMinId()
-        {
-            if (IsLeaf)
-            {
-                return IdList.Min();
-            }
-            throw IndexLeafException.GenerateException(this);
-        }
-
         public string GetFilepath()
         {
             if (!IsLeaf)
             {
                 Console.Write("WARNING! You get index filepath but this index isn't leaf!");
-                return PathUtils.GetCollectionDataFilepathByIndex(this);
             }
-            return PathUtils.GetCollectionDataFilepathByIndex(this);
+            return $"{PathUtils.GetCollectionDataFilepath(CollectionId)}{FileName}{FileSystemConfig.DATA_FILE_POSTFIX}{FileSystemConfig.FILE_EXTENSION}";
         }
         public List<string> GetAllIndexesFilePaths()
         {
@@ -137,9 +117,27 @@ namespace Program
 
         public void Divide()
         {
-            var midId = IdUtils.SubIds(GetRealMaxId(), GetRealMinId());
-            var loverIds = IdList.Where(id => String.Compare(id, midId, StringComparison.Ordinal) < 0);
-            var upperIds = IdList.Where(id => String.Compare(id, midId, StringComparison.Ordinal) >= 0);
+            var sortedSet = new SortedSet<string>(IdList, StringComparer.Ordinal);
+            var loverIds = new List<string>();
+            var upperIds = new List<string>();
+            var counter = 0;
+            var midId = "";
+            foreach (var id in sortedSet)
+            {
+                if (counter < sortedSet.Count / 2)
+                {
+                    loverIds.Add(id);
+                }
+                else
+                {
+                    upperIds.Add(id);
+                }
+                if (counter == sortedSet.Count / 2)
+                {
+                    midId = id;
+                }
+                counter++;
+            }
             var leftFilName = FileName + FileSystemConfig.LEFT_INDEX_POSTFIX;
             var rightFileName = FileName + FileSystemConfig.RIGHT_INDEX_POSTFIX;
             Left = new IdIndex(new HashSet<string>(loverIds), MinId, midId, MaxElements, leftFilName, CollectionId);

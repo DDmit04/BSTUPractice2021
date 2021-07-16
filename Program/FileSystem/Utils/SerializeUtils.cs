@@ -52,13 +52,6 @@ namespace Program
             return fileStream.ReadByte();
         }
 
-        public static CollectionDefinition ReadCollectionDefinition(FileStream fs)
-        {
-            var collectionId = ReadNextString(fs);
-            var collectionName = ReadNextString(fs);
-            var dataUnitsCount = ReadNextInt(fs);
-            return new CollectionDefinition(collectionId, collectionName, dataUnitsCount);
-        }
         public static List<byte> ArrayToBytes(ICollection array, Func<object, List<byte>> serializeFunc)
         {
             var elementsCount = array.Count;

@@ -15,10 +15,5 @@
         {
             return $"{FileSystemConfig.COLLECTIONS_DATA_FILEPATH}{collectionId}/";
         }
-
-        public static string GetCollectionDataFilepathByIndex(IdIndex index)
-        {
-            return $"{GetCollectionDataFilepath(index.CollectionId)}{index.FileName}{FileSystemConfig.DATA_FILE_POSTFIX}{FileSystemConfig.FILE_EXTENSION}";
-        }
     }
 }

@@ -7,12 +7,13 @@ namespace Program.Controller.interfaces
         public List<DataUnit> LoadCollectionData(string collectionId);
         public List<DataUnit> GetDataUnitsByProps(string collectionId, List<DataUnitProp> props);
         public List<DataUnit> GetDataUnitsByPropsAllCollections(List<DataUnitProp> props);
-        public void SaveDataUnit(string collectionId, DataUnit dataUnit);
+        public DataUnit CreateDataUnit(string collectionId);
+        public DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit);
         public void DeleteDataUnit(string collectionId, string dataUnitId);
 
         public List<CollectionDefinition> LoadCollectionDefinitions();
-        public void SaveCollection(CollectionDefinition collectionDefinition);
-        public void CreateCollection(CollectionDefinition collectionDefinition);
+        public CollectionDefinition RenameCollection(string collectionId, string newCollectionName);
+        public CollectionDefinition CreateCollection(string collectionName);
         public void DeleteCollection(string collectionId);
     }
 }

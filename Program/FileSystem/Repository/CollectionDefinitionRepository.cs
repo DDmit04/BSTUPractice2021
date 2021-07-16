@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Program.Controller.interfaces;
+using Program.FileSystem.Utils;
 using Program.userInterface;
 
 namespace Program.Controller
@@ -22,12 +23,23 @@ namespace Program.Controller
         {
             var oldDef = CollectionDefDataSource.LoadCollectionDefinitions()
                 .Find(def => def.Id == collectionDefinition.Id);
-            CollectionDefDataSource.SaveCollectionDefinition(collectionDefinition);
+            if (oldDef != null)
+            {
+                var updatedDef = new CollectionDefinition(oldDef.Id, collectionDefinition.Name, oldDef.CreationDate);
+                CollectionDefDataSource.SaveCollectionDefinition(updatedDef);
+            }
+            else
+            {
+                CollectionDefDataSource.SaveCollectionDefinition(collectionDefinition);
+            }
             return oldDef;
         }
-        public void CreateCollection(CollectionDefinition collectionDefinition)
+        public CollectionDefinition CreateCollection(string collectionName)
         {
-            CollectionDefDataSource.SaveCollectionDefinition(collectionDefinition);
+            var colId = IdUtils.GenerateId();
+            var newColDef = new CollectionDefinition(colId, collectionName);
+            CollectionDefDataSource.SaveCollectionDefinition(newColDef);
+            return newColDef;
         }
 
         public CollectionDefinition DeleteCollection(string collectionId)
