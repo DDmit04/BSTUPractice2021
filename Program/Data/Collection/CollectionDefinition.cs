@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Program
@@ -6,14 +7,27 @@ namespace Program
     public class CollectionDefinition
     {
         public string Id { get; }
-        public string Name { get; }
-        public int DataUnitsCount { get; }
+        public string Name { get; set; }
+        public DateTime CreationDate { get; }
 
-        public CollectionDefinition(string id, string name, int dataUnitsCount)
+        public CollectionDefinition(string name)
+        {
+            Id = null;
+            Name = name;
+        }
+
+        public CollectionDefinition(string id, string name)
         {
             Id = id;
             Name = name;
-            DataUnitsCount = dataUnitsCount;
+            CreationDate = DateTime.Now;
+        }
+
+        public CollectionDefinition(string id, string name, DateTime creationDate)
+        {
+            Id = id;
+            Name = name;
+            CreationDate = creationDate;
         }
 
         public List<byte> Serialize()
@@ -21,7 +35,7 @@ namespace Program
             var bytes = new List<byte>();
             bytes.AddRange(SerializeUtils.StringToBytes(Id));
             bytes.AddRange(SerializeUtils.StringToBytes(Name));
-            bytes.Add(SerializeUtils.IntToByte(DataUnitsCount));
+            bytes.AddRange(SerializeUtils.DateTimeToByte(CreationDate));
             return bytes;
         }
 
@@ -29,8 +43,8 @@ namespace Program
         {
             var id = SerializeUtils.ReadNextString(fileStream);
             var name = SerializeUtils.ReadNextString(fileStream);
-            var dataUnitsCount = SerializeUtils.ReadNextInt(fileStream);
-            return new CollectionDefinition(id, name, dataUnitsCount);
+            var creationDate = SerializeUtils.ReadNextDateTime(fileStream);
+            return new CollectionDefinition(id, name, creationDate);
         }
     }
 }

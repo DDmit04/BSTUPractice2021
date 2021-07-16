@@ -12,18 +12,20 @@ namespace Program
         
         public DateTime CreationTime { get; }
 
+        public DataUnit()
+        {
+            Id = null;
+            Props = new List<DataUnitProp>();
+            CreationTime = DateTime.Now;
+        }
+
         public DataUnit(string id)
         {
             Id = id;
             Props = new List<DataUnitProp>();
             CreationTime = DateTime.Now;
         }
-        public DataUnit(string id, List<DataUnitProp> props)
-        {
-            Id = id;
-            Props = props;
-            CreationTime = DateTime.Now;
-        }
+
         protected DataUnit(string id, List<DataUnitProp> props, DateTime creationTime)
         {
             Id = id;
@@ -31,6 +33,14 @@ namespace Program
             CreationTime = creationTime;
         }
 
+        public void ChangePropName(string oldName, string newName)
+        {
+            var oldProp = GetProperty(oldName);
+            if (oldProp != null)
+            {
+                oldProp.Name = newName;
+            }
+        }
         public bool MatchWithProps(List<DataUnitProp> propsToMatch)
         {
             var matches = propsToMatch.All(searchField =>
@@ -73,25 +83,21 @@ namespace Program
         {
             Props.Add(dataUnitProp);
         }
-        public void AddProperties(List<DataUnitProp> dataUnitProps)
-        {
-            foreach (var dataUnit in dataUnitProps)
-            {
-                Props.Add(dataUnit);
-            }
-        }
-
         public void UpdateProperty(DataUnitProp dataUnitProp)
         {
             SetProperty(dataUnitProp.Name, dataUnitProp);
         }
-        protected void SetProperty(string name, DataUnitProp dataUnitProp)
+        public void SetProperty(string oldName, DataUnitProp dataUnitProp)
         {
-            var propToUpdate = GetProperty(name);
-            if (propToUpdate != null)
+            var propToUpdate = GetProperty(oldName);
+            if (propToUpdate != null && dataUnitProp.Name != null)
             {
-                var removed = Props.Remove(propToUpdate);
+                Props.Remove(propToUpdate);
                 Props.Add(dataUnitProp);
+            }
+            else
+            {
+                AddProperty(dataUnitProp);
             }
         }
 
