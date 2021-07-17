@@ -86,15 +86,24 @@ namespace Program
 
         public static List<byte> DateTimeToByte(DateTime val)
         {
-            return new List<byte>(BitConverter.GetBytes(val.Ticks));
+            return LongToBytes(val.Ticks);
         }
 
         public static DateTime ReadNextDateTime(FileStream fileStream)
         {
+            var ticks = ReadNextLong(fileStream);
+            return new DateTime(ticks);
+        }
+        public static List<byte> LongToBytes(long val)
+        {
+            return new List<byte>(BitConverter.GetBytes(val));
+        }
+
+        public static long ReadNextLong(FileStream fileStream)
+        {
             var dateBuffer = new byte[8];
             fileStream.Read(dateBuffer, 0, dateBuffer.Length);
-            var ticks = BitConverter.ToInt64(dateBuffer);
-            return new DateTime(ticks);
+            return BitConverter.ToInt64(dateBuffer);
         }
     }
 }

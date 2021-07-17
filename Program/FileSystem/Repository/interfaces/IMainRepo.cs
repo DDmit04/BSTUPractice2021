@@ -9,7 +9,7 @@ namespace Program.Controller.interfaces
         public List<DataUnit> GetDataUnitsByPropsAllCollections(List<DataUnitProp> props);
         public DataUnit CreateDataUnit(string collectionId);
         public DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit);
-        public void DeleteDataUnit(string collectionId, string dataUnitId);
+        public void DeleteDataUnit(string collectionId, long dataUnitId);
 
         public List<CollectionDefinition> LoadCollectionDefinitions();
         public CollectionDefinition RenameCollection(string collectionId, string newCollectionName);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Program.Exceptions;
 using Program.FileSystem.Utils;
 using Program.Utils;
@@ -24,12 +25,12 @@ namespace Program
         {
             get => Left == null && Right == null;
         }
-        public string MaxId { get; }
-        public string MinId { get; }
+        public long MaxId { get; }
+        public long MinId { get; }
         public int MaxElements { get; }
         public IdIndex Left { get; protected set; }
         public IdIndex Right { get; protected set; }
-        public HashSet<string> IdList { get; }
+        public HashSet<long> IdList { get; }
         public string FileName { get; }
         public string CollectionId { get; }
 
@@ -41,27 +42,27 @@ namespace Program
             MinId = left.MinId;
             FileName = fileName;
             CollectionId = collectionId;
-            IdList = new HashSet<string>();
+            IdList = new HashSet<long>();
         }
 
-        public IdIndex(HashSet<string> idList, string minId, string maxId, int maxElements, string fileName,
+        public IdIndex(HashSet<long> idList, long minId, long maxId, int maxElements, string fileName,
             string collectionId)
         {
             MaxId = maxId;
             MinId = minId;
             IdList = idList;
-            IdList ??= new HashSet<string>();
+            IdList ??= new HashSet<long>();
             MaxElements = maxElements;
             FileName = fileName;
             CollectionId = collectionId;
             Left = null;
             Right = null;
         }
-        public IdIndex(string collectionId, int maxElements = 2)
+        public IdIndex(string collectionId, int maxElements = 10)
         {
-            MaxId = IdUtils.GetMaxObjId();
-            MinId = IdUtils.GetMinObjId();
-            IdList = new HashSet<string>();
+            MaxId = long.MaxValue;
+            MinId = long.MinValue;
+            IdList = new HashSet<long>();
             MaxElements = maxElements;
             FileName = DateTime.Now.Ticks.ToString();
             CollectionId = collectionId;
@@ -91,7 +92,7 @@ namespace Program
             }
             return filepathsList;
         }
-        public string FindIndexFilepathByUnitId(string dataUnitId)
+        public string FindIndexFilepathByUnitId(long dataUnitId)
         {
             var isInRange = IsInRange(dataUnitId);
             if (isInRange && IsLeaf)
@@ -109,39 +110,20 @@ namespace Program
             throw IndexRangeException.GenerateException(this, dataUnitId);
         }
 
-        public bool IsInRange(string id)
+        public bool IsInRange(long id)
         {
-            return String.Compare(id, MaxId, StringComparison.Ordinal) < 0
-                   && String.Compare(id, MinId, StringComparison.Ordinal) >= 0;
+            return id < MaxId && id >= MinId;
         }
 
         public void Divide()
         {
-            var sortedSet = new SortedSet<string>(IdList, StringComparer.Ordinal);
-            var loverIds = new List<string>();
-            var upperIds = new List<string>();
-            var counter = 0;
-            var midId = "";
-            foreach (var id in sortedSet)
-            {
-                if (counter < sortedSet.Count / 2)
-                {
-                    loverIds.Add(id);
-                }
-                else
-                {
-                    upperIds.Add(id);
-                }
-                if (counter == sortedSet.Count / 2)
-                {
-                    midId = id;
-                }
-                counter++;
-            }
+            var midId = IdUtils.GetMidLong(IdList.Max(), IdList.Min());
+            var loverIds = IdList.Where(id => id < midId);
+            var upperIds = IdList.Where(id => id >= midId);
             var leftFilName = FileName + FileSystemConfig.LEFT_INDEX_POSTFIX;
             var rightFileName = FileName + FileSystemConfig.RIGHT_INDEX_POSTFIX;
-            Left = new IdIndex(new HashSet<string>(loverIds), MinId, midId, MaxElements, leftFilName, CollectionId);
-            Right = new IdIndex(new HashSet<string>(upperIds), midId, MaxId, MaxElements, rightFileName, CollectionId);
+            Left = new IdIndex(new HashSet<long>(loverIds), MinId, midId, MaxElements, leftFilName, CollectionId);
+            Right = new IdIndex(new HashSet<long>(upperIds), midId, MaxId, MaxElements, rightFileName, CollectionId);
             IdList.Clear();
         }
 
@@ -159,7 +141,7 @@ namespace Program
         /// <param name="dataUnitId"></param>
         /// <returns>Индекс, кторый нужно разделить на 2</returns>
         /// <exception cref="Exception"></exception>
-        public IdIndex AddDataUnitIndex(string dataUnitId)
+        public IdIndex AddDataUnitIndex(long dataUnitId)
         {
             if (IsInRange(dataUnitId))
             {
@@ -189,7 +171,7 @@ namespace Program
         /// </summary>
         /// <param name="dataUnitId"></param>
         /// <returns>Индекс, который нужно объеденить</returns>
-        public IdIndex RemoveDataUnitIndex(string dataUnitId)
+        public IdIndex RemoveDataUnitIndex(long dataUnitId)
         {
             if (IsInRange(dataUnitId))
             {
@@ -228,8 +210,8 @@ namespace Program
             bytes.Add(SerializeUtils.IntToByte(MaxElements));
             bytes.AddRange(SerializeUtils.StringToBytes(FileName));
             bytes.Add(SerializeUtils.BoolToByte(IsLeaf));
-            bytes.AddRange(SerializeUtils.StringToBytes(MinId));
-            bytes.AddRange(SerializeUtils.StringToBytes(MaxId));
+            bytes.AddRange(SerializeUtils.LongToBytes(MinId));
+            bytes.AddRange(SerializeUtils.LongToBytes(MaxId));
             if (!IsLeaf)
             {
                 bytes.AddRange(Left.Serialize());
@@ -240,7 +222,7 @@ namespace Program
                 bytes.Add(SerializeUtils.IntToByte(IdList.Count));
                 foreach (var id in IdList)
                 {
-                    bytes.AddRange(SerializeUtils.StringToBytes(id));
+                    bytes.AddRange(SerializeUtils.LongToBytes(id));
                 }
             }
             return bytes;
@@ -251,8 +233,8 @@ namespace Program
             var maxElements = SerializeUtils.ReadNextInt(fileStream);
             var fileName = SerializeUtils.ReadNextString(fileStream);
             var isLeaf = SerializeUtils.ReadNextBool(fileStream);
-            var minId = SerializeUtils.ReadNextString(fileStream);
-            var maxId = SerializeUtils.ReadNextString(fileStream);
+            var minId = SerializeUtils.ReadNextLong(fileStream);
+            var maxId = SerializeUtils.ReadNextLong(fileStream);
             if (!isLeaf)
             {
                 var left = Deserialize(fileStream, collectionId);
@@ -262,10 +244,10 @@ namespace Program
             else
             {
                 var idCount = SerializeUtils.ReadNextInt(fileStream);
-                var idList = new HashSet<string>();
+                var idList = new HashSet<long>();
                 for (int i = 0; i < idCount; i++)
                 {
-                    idList.Add(SerializeUtils.ReadNextString(fileStream));
+                    idList.Add(SerializeUtils.ReadNextLong(fileStream));
                 }
                 return new IdIndex(idList, minId, maxId, maxElements, fileName, collectionId);
             }

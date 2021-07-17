@@ -58,7 +58,7 @@ namespace Program
             return DataUnitRepository.CreateDataUnit(collectionId);
         }
 
-        public void DeleteDataUnit(string collectionId, string dataUnitId)
+        public void DeleteDataUnit(string collectionId, long dataUnitId)
         {
             DataUnitRepository.DeleteDataUnit(collectionId, dataUnitId);
         }

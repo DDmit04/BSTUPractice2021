@@ -17,6 +17,6 @@ namespace Program.userInterface
 
         DataUnit AddDataUnit(string collectionId);
         DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit);
-        void DeleteDataUnit(string collectionId, string dataUnitId);
+        void DeleteDataUnit(string collectionId, long dataUnitId);
     }
 }

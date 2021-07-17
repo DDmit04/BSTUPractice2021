@@ -43,7 +43,7 @@ namespace Program
             AllIndexes.Add(index);
         }
 
-        public IdIndex AddDataUnit(string collectionId, string dataUnitId)
+        public IdIndex AddDataUnit(string collectionId, long dataUnitId)
         {
             var index = FindIndexByCollectionIdOrThrow(collectionId);
             var indexToDivide = index.AddDataUnitIndex(dataUnitId);
@@ -55,7 +55,7 @@ namespace Program
             return indexToDivide;
         }
 
-        public IdIndex RemoveDataUnit(string collectionId, string dataUnitId)
+        public IdIndex RemoveDataUnit(string collectionId, long dataUnitId)
         {
             var index = FindIndexByCollectionIdOrThrow(collectionId);
             var indexToUnite = index.RemoveDataUnitIndex(dataUnitId);
@@ -74,7 +74,7 @@ namespace Program
             return index.GetAllIndexesFilePaths();
         }
 
-        public string GetDataUnitIndexFilepath(string collectionId, string dataUnitId)
+        public string GetDataUnitIndexFilepath(string collectionId, long dataUnitId)
         {
             var index = FindIndexByCollectionIdOrThrow(collectionId);
             return index.FindIndexFilepathByUnitId(dataUnitId);
@@ -96,7 +96,7 @@ namespace Program
             throw IndexNotFoundException.GenerateException(collectionId);
         }
 
-        public void MakeBackupOfIndex(string collectionId)
+        public void BackupIndex(string collectionId)
         {
             var index = FindIndexByCollectionIdOrThrow(collectionId);
             var backupFilepath = PathUtils.GetIndexBackupFilepath(collectionId);

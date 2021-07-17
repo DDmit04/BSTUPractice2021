@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Program.userInterface;
@@ -9,27 +8,15 @@ namespace Program
 {
     public class DataUnitDataSource : IDataUnitDataSource
     {
-        public void DivideIndexDataByTwo(string oldIndexFilepath, string newLeftIndexPath, string newRightIndexPath)
+        public void DivideIndexDataByTwo(string oldIndexFilepath, string newLeftIndexPath, string newRightIndexPath,
+            long divideId)
         {
             var dataUnits = LoadDataUnitsFromFile(oldIndexFilepath);
-            dataUnits.Sort((firstUnit, secUnit) => String.Compare(firstUnit.Id, secUnit.Id, StringComparison.Ordinal));
-            var loverUnits = new List<DataUnit>();
-            var upperUnits = new List<DataUnit>();
-            var counter = 0;
-            foreach (var unit in dataUnits)
-            {
-                if (counter < dataUnits.Count / 2)
-                {
-                    loverUnits.Add(unit);
-                }
-                else
-                {
-                    upperUnits.Add(unit);
-                }
-                counter++;
-            }
-            RewriteDataUnitsToFile(newLeftIndexPath, loverUnits);
-            RewriteDataUnitsToFile(newRightIndexPath, upperUnits);
+            var loverUnits = dataUnits.Where(unit => unit.Id < divideId);
+            var upperUnits = dataUnits.Where(unit => unit.Id >= 0);
+
+            RewriteDataUnitsToFile(newLeftIndexPath, new List<DataUnit>(loverUnits));
+            RewriteDataUnitsToFile(newRightIndexPath, new List<DataUnit>(upperUnits));
             DirUtils.DeleteFile(oldIndexFilepath);
         }
         
@@ -87,7 +74,7 @@ namespace Program
         /// <param name="filepath"></param>
         /// <param name="dataUnitId"></param>
         /// <returns>Запись была удалена</returns>
-        public bool DeleteDataUnit(string filepath, string dataUnitId)
+        public bool DeleteDataUnit(string filepath, long dataUnitId)
         {
             var dataUnits = LoadDataUnitsFromFile(filepath);
             var dataUnitToDelete = dataUnits.Find(unit => unit.Id == dataUnitId);

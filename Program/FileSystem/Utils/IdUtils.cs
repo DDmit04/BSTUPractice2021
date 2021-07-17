@@ -1,9 +1,20 @@
 ﻿using System;
+using System.Numerics;
 
 namespace Program.FileSystem.Utils
 {
     public class IdUtils
     {
+        public static long GenerateDataUnitId()
+        {
+            var rnd = new Random();
+            var res =((long) (uint) rnd.Next(int.MinValue, int.MaxValue)) << 32 | (uint) rnd.Next(int.MinValue, int.MaxValue);
+            if (res < 0)
+            {
+                res *= -1;
+            }
+            return res;
+        }
         public static string GenerateId()
         {
             var idChars = new char[32];
@@ -54,6 +65,13 @@ namespace Program.FileSystem.Utils
                 idChars[i] = nextChar;
             }
             return new string(idChars);
+        }
+        public static long GetMidLong(long first, long sec)
+        {
+            var bigFirst = new BigInteger(first);
+            var bigSec = new BigInteger(sec);
+            var res = (bigFirst + bigSec) / 2;
+            return (long) Math.Round((double) res);
         }
     }
 }

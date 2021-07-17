@@ -55,7 +55,7 @@ namespace Program.userInterface
             return MainRepo.UpdateDataUnit(collectionId, dataUnit);
         }
 
-        public void DeleteDataUnit(string collectionId, string dataUnitId)
+        public void DeleteDataUnit(string collectionId, long dataUnitId)
         {
             MainRepo.DeleteDataUnit(collectionId, dataUnitId);
         }

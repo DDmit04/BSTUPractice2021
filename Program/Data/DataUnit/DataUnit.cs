@@ -7,26 +7,26 @@ namespace Program
 {
     public class DataUnit : IComparable
     {
-        public string Id { get; }
+        public long Id { get; }
         public List<DataUnitProp> Props { get; }
         
         public DateTime CreationTime { get; }
 
         public DataUnit()
         {
-            Id = null;
+            Id = 0;
             Props = new List<DataUnitProp>();
             CreationTime = DateTime.Now;
         }
 
-        public DataUnit(string id)
+        public DataUnit(long id)
         {
             Id = id;
             Props = new List<DataUnitProp>();
             CreationTime = DateTime.Now;
         }
 
-        protected DataUnit(string id, List<DataUnitProp> props, DateTime creationTime)
+        protected DataUnit(long id, List<DataUnitProp> props, DateTime creationTime)
         {
             Id = id;
             Props = props;
@@ -104,7 +104,7 @@ namespace Program
         public List<byte> Serialize()
         {
             var bytes = new List<byte>();
-            bytes.AddRange(SerializeUtils.StringToBytes(Id));
+            bytes.AddRange(SerializeUtils.LongToBytes(Id));
             bytes.AddRange(SerializeUtils.DateTimeToByte(CreationTime));
             var propsCount = Props.Count;
             bytes.Add(SerializeUtils.IntToByte(propsCount));
@@ -117,7 +117,7 @@ namespace Program
 
         public static DataUnit Deserialize(FileStream fileStream)
         {
-            var id = SerializeUtils.ReadNextString(fileStream);
+            var id = SerializeUtils.ReadNextLong(fileStream);
             var creationTime = SerializeUtils.ReadNextDateTime(fileStream);
             var propsCount = SerializeUtils.ReadNextInt(fileStream);
             var props = new List<DataUnitProp>();

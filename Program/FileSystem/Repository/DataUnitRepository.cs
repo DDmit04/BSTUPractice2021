@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Program.Controller.interfaces;
 using Program.FileSystem.Utils;
 using Program.userInterface;
@@ -54,13 +55,13 @@ namespace Program.Controller
         }
         public DataUnit CreateDataUnit(string collectionId)
         {
-            var id = IdUtils.GenerateId();
+            var id = IdUtils.GenerateDataUnitId();
             var dataUnit = new DataUnit(id);
             var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnit.Id);
             var savedDataUnit = DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
             try
             {
-                IndexRepository.MakeBackupOfIndex(collectionId);
+                IndexRepository.BackupIndex(collectionId);
                 var indexToDivide = IndexRepository.AddDataUnit(collectionId, dataUnit.Id);
                 if (indexToDivide != null)
                 {
@@ -82,7 +83,7 @@ namespace Program.Controller
             }
             return savedDataUnit;
         }
-        public void DeleteDataUnit(string collectionId, string dataUnitId)
+        public void DeleteDataUnit(string collectionId, long dataUnitId)
         {
             var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnitId);
             var dataUnitToDelete = DataUnitDataSource.LoadDataUnitsFromFile(filepath).Find(unit => unit.Id == dataUnitId);
@@ -91,7 +92,7 @@ namespace Program.Controller
             {
                 try
                 {
-                    IndexRepository.MakeBackupOfIndex(collectionId);
+                    IndexRepository.BackupIndex(collectionId);
                     var indexToUnite = IndexRepository.RemoveDataUnit(collectionId, dataUnitId);
                     if (indexToUnite != null)
                     {
@@ -159,10 +160,11 @@ namespace Program.Controller
         }
         protected void DivideIndexByTwo(IdIndex indexToDivide)
         {
+            var midId = IdUtils.GetMidLong(indexToDivide.Right.IdList.Max(), indexToDivide.Left.IdList.Min());
             var dataFilepath = indexToDivide.GetFilepath();
             var leftFilepath = indexToDivide.Left.GetFilepath();
             var rightFilepath = indexToDivide.Right.GetFilepath();
-            DataUnitDataSource.DivideIndexDataByTwo(dataFilepath, leftFilepath, rightFilepath);
+            DataUnitDataSource.DivideIndexDataByTwo(dataFilepath, leftFilepath, rightFilepath, midId);
         }
 
         protected void UniteTwoIndex(IdIndex indexToUnite)

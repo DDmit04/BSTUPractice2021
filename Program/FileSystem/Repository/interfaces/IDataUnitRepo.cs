@@ -9,7 +9,7 @@ namespace Program.Controller.interfaces
         public List<DataUnit> GetDataUnitsByPropsAllCollections(List<DataUnitProp> props);
         public DataUnit CreateDataUnit(string collectionId);
         public DataUnit SaveDataUnit(string collectionId, DataUnit dataUnit);
-        public void DeleteDataUnit(string collectionId, string dataUnitId);
+        public void DeleteDataUnit(string collectionId, long dataUnitId);
         public void DeleteAllCollectionData(string collectionId);
     }
 }
