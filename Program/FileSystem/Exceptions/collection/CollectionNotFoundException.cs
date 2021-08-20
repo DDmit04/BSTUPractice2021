@@ -10,7 +10,7 @@ namespace Program.Exceptions.collection
 
         public static CollectionNotFoundException GenerateException(string collectionId)
         {
-            return new CollectionNotFoundException($"Collection with id - {collectionId} not found!");
+            return new($"Collection with id - {collectionId} not found!");
         }
     }
 }

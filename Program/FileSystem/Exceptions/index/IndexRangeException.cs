@@ -1,4 +1,6 @@
-﻿namespace Program.Exceptions
+﻿using System.Linq;
+
+namespace Program.Exceptions
 {
     public class IndexRangeException : IndexException
     {
@@ -7,9 +9,14 @@
         {
         }
 
-        public static IndexRangeException GenerateException(IdIndex index, long id)
+        public static IndexRangeException GenerateIdNotFoundException(IdIndex index, long id)
         {
-            return new IndexRangeException($"DataUnit with id - {id} can't be placed in index! Index range - [{index.MinId}..{index.MaxId}]");
+            return new($"DataUnit with id - {id} isn't in index range! [{index.Borders.Min()}..{index.Borders.Max()}] ");
+        }
+        
+        public static IndexRangeException GenerateNearestIndexNotFoundException(IdIndex from, IdIndex index)
+        {
+            return new($"Can't find nearest index for [{index.MinBorder}..{index.MaxBorder}] from [{from.MinBorder}..{from.MaxBorder}] ");
         }
     }
 }
