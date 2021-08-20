@@ -3,12 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Program"
         mc:Ignorable="d"
-        Title="CollectionWindow" Height="700" Width="600">
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="CollectionWindow" Height="708" Width="620">
     <Grid>
-        <TextBlock HorizontalAlignment="Left" Margin="32,26,0,0" Text="Collection 1" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="116" FontSize="20" FontWeight="DemiBold"/>
-        <Separator HorizontalAlignment="Center" Margin="0,56,0,613" RenderTransformOrigin="0.5,0.5" Width="600">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="63*"/>
+            <RowDefinition Height="17*"/>
+            <RowDefinition Height="563*"/>
+            <RowDefinition Height="49*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="338*"/>
+            <ColumnDefinition Width="157*"/>
+            <ColumnDefinition Width="125*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="CollectionNameTexBox" Margin="10,21,14,8" Text="Collection name" TextWrapping="Wrap" FontSize="20" FontWeight="DemiBold"/>
+        <Separator Margin="-11,4,-18,1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="3" Grid.Row="1">
             <Separator.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1"/>
@@ -18,40 +29,59 @@
                 </TransformGroup>
             </Separator.RenderTransform>
         </Separator>
-        <TabControl x:Name="records" Margin="10,71,10,87">
-            <TabItem Header="Record 1">
-                <ListBox>
-                    <StackPanel Height="70" Width="463" Orientation="Horizontal">
-                        <TextBlock Text="id" TextWrapping="Wrap" Width="163"/>
-                        <TextBlock Text="id548486512" TextWrapping="Wrap" Width="167"/>
-                    </StackPanel>
-                    <StackPanel Height="70" Width="475" Orientation="Horizontal">
-                        <TextBlock Text="name" TextWrapping="Wrap" Width="163"/>
-                        <TextBlock Text="My name" TextWrapping="Wrap" Width="167"/>
-                    </StackPanel>
-                    <StackPanel Height="70" Width="463" Orientation="Horizontal" >
-                        <TextBlock Text="num" TextWrapping="Wrap" Width="163"/>
-                        <TextBlock Text="500" TextWrapping="Wrap" Width="167"/>
-                    </StackPanel>
-                </ListBox>
-            </TabItem>
-            <TabItem Header="Record 2">
-                <ListBox>
-                    <StackPanel Height="70" Width="464" Orientation="Horizontal">
-                        <TextBlock Text="id" TextWrapping="Wrap" Width="163"/>
-                        <TextBlock Text="id9651145665" TextWrapping="Wrap" Width="167"/>
-                    </StackPanel>
-                    <StackPanel Height="70" Width="499" Orientation="Horizontal">
-                        <TextBlock Text="name" TextWrapping="Wrap" Width="163"/>
-                        <TextBlock Text="what name?" TextWrapping="Wrap" Width="167"/>
-                    </StackPanel>
-                </ListBox>
-            </TabItem>
-        </TabControl>
-        <Button Content="Create Record" HorizontalAlignment="Left" Margin="427,26,0,0" VerticalAlignment="Top" Height="30" Width="123" Click="CreateRecordClick"/>
-        <Button Content="Edit Field" HorizontalAlignment="Left" Margin="300,621,0,0" VerticalAlignment="Top" Height="30" Width="122"/>
-        <Button Content="Add Field" HorizontalAlignment="Left" Margin="450,621,0,0" VerticalAlignment="Top" Height="30" Width="122" Click="AddFieldClick"/>
-        <Button Content="Delete Record" HorizontalAlignment="Left" Margin="290,26,0,0" VerticalAlignment="Top" Height="30" Width="122" Click="DeleteRecordClick"/>
 
+        <ListView Name="DataUnitsList" Margin="10,4,10,9" Grid.ColumnSpan="3" BorderBrush="Black" Grid.Row="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid  Margin="0,10,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" FontSize="17" Margin="0,0,0,5">
+                            <TextBlock.Text>
+                                <MultiBinding  StringFormat = "Id: {0}">
+                                    <Binding Path = "Id"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <DataGrid Grid.Row="1" GotFocus="DataGridGotFocus" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}">
+                                    <EventSetter Event="LostFocus" Handler="DataGridCellLostFocus"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Width="8*" Binding="{Binding Name}"  FontSize="17"/>
+                                <DataGridTextColumn Header="Value" Width="8*" Binding="{Binding Value}" FontSize="17"/>
+                                <DataGridTemplateColumn Width="4*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Del" Click="DeleteField" FontSize="17" Background="Red"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Button Grid.Row="2" FontSize="15" Height="30" Content="Add field" Background="#FF4BA9FF" Margin="0,5,0,5" Click="AddField"/>
+                        <Separator Grid.Row="3" BorderThickness="2,2,2,2" BorderBrush="Black" Width="{Binding ElementName=DataUnitsList, Path=ActualWidth}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button x:Name="CreateRecordBtn" Content="Create Record" Margin="43,17,10,11" Click="CreateRecord" Grid.Column="1" RenderTransformOrigin="0.438,0.201" Background="#FF4BA9FF"/>
+        <Button x:Name="DeleteRecordBtn" Content="Delete Record" Margin="0,17,0,11" Click="DeleteRecord" Grid.Column="2" Background="#FFF53A3A" HorizontalAlignment="Center" Width="104"/>
+        <Button x:Name="SearchByCollectionBtn" Content="Search by collection" Margin="146,2,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Click="SearchByCollectionBtn_Click"/>
     </Grid>
 </Window>

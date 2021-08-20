@@ -1,106 +1,214 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Program.FileSystem.Exceptions;
+using Program.userInterface;
 
 namespace Program
 {
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
+        private readonly UserInterface UserInterface;
+
+        private List<CollectionDefinition> CollectionDefinitions { get; set; }
+
         public MainWindow()
         {
+            UserInterface = new UserInterface(new MainRepo());
+            RefreshCollectionList();
+
             InitializeComponent();
+
+            CollectionsList.ItemsSource = CollectionDefinitions;
+            CollectionsList.SelectionChanged += new SelectionChangedEventHandler(UpdateBthStates);
+            UpdataBtnStates();
         }
+
+        private void RefreshCollectionList()
+        {
+            try
+            {
+                CollectionDefinitions = UserInterface.GetCollectionDefinitions();
+            }
+            catch (Exception exception)
+            {
+                string logFilepath = ExceptionLogger.LogException(exception);
+                ShowErrorMessage("Error!", "Error while loading collections info!", logFilepath);
+            }
+        }
+
 
         private void CreateCollectionButton_Click(object sender, RoutedEventArgs e)
         {
-            TextBox tb = new TextBox
+            var renameCollectionDialog = new CollectionRenameWindow("");
+            if (renameCollectionDialog.ShowDialog().Value)
             {
-                //Text = "Collection 1",
-                FontSize = 17,
-                Height = 32,
-                Width = 242,
-                Padding = new Thickness(5, 0, 0, 0)
-            };
-            tb.LostFocus += new RoutedEventHandler(TextBoxClosing);
-
-            CollectionsList.Items.Add(tb);
-        }
-
-        
-
-        private void TextBoxClosing(object sender, RoutedEventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-            int index = CollectionsList.Items.IndexOf(tb);
-            string collectionName = tb.Text;
-            CollectionsList.Items.Remove(tb);
-
-            TextBlock textBlock = new TextBlock
-            {
-                Text = collectionName,
-                FontSize = 17,
-                Height = 32,
-                Width = 560,
-                Padding = new Thickness(10, 0, 0, 0)
-            };
-            textBlock.MouseLeftButtonDown += new MouseButtonEventHandler(OpenCollection);
-
-
-
-            CollectionsList.Items.Insert(index, textBlock);
-        }
-
-        private void OpenCollection(object sender, RoutedEventArgs e)
-        {
-            if (CollectionsList.SelectedItem == sender)
-            {
-                CollectionWindow collectionWindow = new CollectionWindow();
-                collectionWindow.Show();
+                var newCollectionName = renameCollectionDialog.collectionNewName;
+                if (newCollectionName.Trim().Length != 0)
+                {
+                    try
+                    {
+                        var newCollection = UserInterface.CreateCollection(newCollectionName);
+                        CollectionDefinitions.Add(newCollection);
+                        ShowInfoMessage("Success!", "New collection was created.");
+                        RefreshListBoxData();
+                    }
+                    catch(Exception exception)
+                    {
+                        string logFilepath = ExceptionLogger.LogException(exception);
+                        ShowErrorMessage("Error", "Error while creating new collection!", logFilepath);
+                    }
+                }
             }
-            
+
         }
 
+        private void OpenCollection(object sender, MouseButtonEventArgs e)
+        {
+            if (CollectionsList.SelectedItem != null)
+            {
+                var collectionToOpen = (CollectionDefinition)CollectionsList.SelectedItem;
+                try
+                {
+                    var collectionData = UserInterface.GetCollectionData(collectionToOpen.Id);
+                    CollectionWindow collectionWindow = new CollectionWindow(collectionToOpen, collectionData, UserInterface);
+                    collectionWindow.Show();
+                }
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    ShowErrorMessage("Error", "Error while loading collection data!", logFilepath);
+                }
+            }
+        }
 
         private void DeleteCollection(object sender, RoutedEventArgs e)
         {
-            CollectionsList.Items.Remove(CollectionsList.SelectedItem);
+            if (CollectionsList.SelectedItem != null)
+            {
+                var deletingCollection = (CollectionDefinition)CollectionsList.SelectedItem;
+                try
+                {
+                    UserInterface.DeleteCollection(CollectionDefinitions[CollectionsList.Items.IndexOf(CollectionsList.SelectedItem)].Id);
+                    ShowInfoMessage("Success!", "Collection was deleted.");
+                    CollectionDefinitions.Remove(deletingCollection);
+                    RefreshListBoxData();
+                } 
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    ShowErrorMessage("Error", "Error while deleting collection!", logFilepath);
+                    RefreshCollectionList();
+                    RefreshListBoxData();
+                }
+            }
         }
 
         private void RenameCollection(object sender, RoutedEventArgs e)
         {
-            if (CollectionsList.SelectedItem.GetType().Name == "TextBlock") //скорее всего можно сделать умнее
+            if (CollectionsList.SelectedItem != null)
             {
-                int index = CollectionsList.Items.IndexOf(CollectionsList.SelectedItem);
-                string collectionName = (CollectionsList.SelectedItem as TextBlock).Text;
-                CollectionsList.Items.Remove(CollectionsList.SelectedItem);
-                TextBox tb = new TextBox
+                var renamingCollection = (CollectionDefinition)CollectionsList.SelectedItem;
+                var renameCollectionDialog = new CollectionRenameWindow(renamingCollection.Name);
+                if (renameCollectionDialog.ShowDialog().Value)
                 {
-                    Text = collectionName,
-                    FontSize = 17,
-                    Height = 32,
-                    Width = 242,
-                    Padding = new Thickness(5, 0, 0, 0)
-                };
-                tb.LostFocus += new RoutedEventHandler(TextBoxClosing);
-
-                CollectionsList.Items.Insert(index, tb);
+                    var newCollectionName = renameCollectionDialog.collectionNewName;
+                    if (newCollectionName.Trim().Length != 0 && newCollectionName != renamingCollection.Name)
+                    {
+                        try
+                        {
+                            UserInterface.RenameCollection(renamingCollection.Id, newCollectionName);
+                            ShowInfoMessage("Success!", "Collection name was changed.");
+                            var index = CollectionDefinitions.FindIndex(col => col.Id == renamingCollection.Id);
+                            CollectionDefinitions.Remove(renamingCollection);
+                            renamingCollection.Name = newCollectionName;
+                            CollectionDefinitions.Insert(index, renamingCollection);
+                            RefreshListBoxData();
+                        } 
+                        catch(Exception exception)
+                        {
+                            string logFilepath = ExceptionLogger.LogException(exception);
+                            ShowErrorMessage("Error!", "Error while saving new collection data!", logFilepath);
+                            RefreshCollectionList();
+                            RefreshListBoxData();
+                        }
+                    }
+                }
             }
+        }
 
+        private void SearchButtonClick(object sender, RoutedEventArgs e)
+        {
+            SearchRequestWindow searchWindow = new SearchRequestWindow(UserInterface);
+            var dialogResult = searchWindow.ShowDialog().Value;
+            var dataUnits = new List<DataUnit>();
+            var searchProps = searchWindow.ReductedDataUnitProps;
+            if (dialogResult)
+            {
+                try
+                {
+                    dataUnits = UserInterface.SearchDataUnitsAllCollections(searchProps);
+                }
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    ShowErrorMessage("Error!", "Error while search data!", logFilepath);
+                }
+                var searchResultsWindow = new SearchResultsWindow(dataUnits);
+                searchResultsWindow.Show();
+            }
+        }
 
+        private void UpdateBthStates(object sender, RoutedEventArgs e)
+        {
+            UpdataBtnStates();
+        }
+
+        public static void ShowInfoMessage(string title, string body)
+        {
+            MessageBox.Show(body, title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public static void ShowErrorMessage(string title, string body, string logFilepath = "")
+        {
+            if (logFilepath != "")
+            {
+                body += $" Файл с логами ошибки - {logFilepath}";
+            }
+            MessageBox.Show(body, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        public static void ShowWarningMessage(string title, string body, string logFilepath = "")
+        {
+            if (logFilepath != "")
+            {
+                body += $" Файл с логами ошибки - {logFilepath}";
+            }
+            MessageBox.Show(body, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        private void UpdataBtnStates()
+        {
+            if (CollectionsList.SelectedItem == null)
+            {
+                deleteCollectionBtn.IsEnabled = false;
+                renameCollectionBtn.IsEnabled = false;
+            }
+            else
+            {
+                deleteCollectionBtn.IsEnabled = true;
+                renameCollectionBtn.IsEnabled = true;
+            }
+        }
+        private void RefreshListBoxData()
+        {
+            CollectionsList.ItemsSource = null;
+            CollectionsList.ItemsSource = CollectionDefinitions;
         }
     }
 }

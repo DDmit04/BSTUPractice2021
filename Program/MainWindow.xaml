@@ -5,14 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Program"
         mc:Ignorable="d"
-        Title="Data Base" Height="700" Width="600" WindowStyle="ThreeDBorderWindow">
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Data Base" Height="722" Width="600" WindowStyle="ThreeDBorderWindow">
     <Grid>
-        <Button x:Name="CreateCollectionButton" Content="Create collection" HorizontalAlignment="Left" Margin="428,21,0,0" VerticalAlignment="Top" Height="39" Width="139" FontSize="16" Click="CreateCollectionButton_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="33,21,0,0" Text="Collections" TextWrapping="Wrap" VerticalAlignment="Top" Height="39" Width="118" FontSize="22"/>
-        <ListBox x:Name="CollectionsList" Margin="0,77,0,75" BorderBrush="{x:Null}"/>
-        <Button Content="Rename" HorizontalAlignment="Left" Margin="355,626,0,0" VerticalAlignment="Top" Height="28" Width="97" Click="RenameCollection"/>
-        <Button Content="Delete" HorizontalAlignment="Left" Margin="480,627,0,0" VerticalAlignment="Top" Height="27" Width="97" Click="DeleteCollection"/>
-
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="637*"/>
+            <RowDefinition Height="47*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="139*"/>
+            <ColumnDefinition Width="89*"/>
+            <ColumnDefinition Width="72*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="CreateCollectionButton" Content="Create collection" Margin="0,21,10,0" VerticalAlignment="Top" Height="39" FontSize="16" Click="CreateCollectionButton_Click" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" Width="139" Background="#FF4BA9FF"/>
+        <TextBlock Margin="10,23,0,0" Text="Collections" TextWrapping="Wrap" VerticalAlignment="Top" Height="39" FontSize="22" HorizontalAlignment="Left" Width="118"/>
+        <ListBox x:Name="CollectionsList" Margin="10,77,10,10" BorderBrush="Black" Grid.ColumnSpan="3" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="{x:Null}">
+                        <ContentControl MouseDoubleClick="OpenCollection">
+                            <TextBlock Text="{Binding Name}" FontSize="17" Height="32" Padding="5" VerticalAlignment="Center"/>
+                        </ContentControl>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="renameCollectionBtn" Content="Rename" Margin="40,5,15,10" Click="RenameCollection" Grid.Column="1" Grid.Row="1" Background="#FF4BA9FF"/>
+        <Button x:Name="deleteCollectionBtn" Content="Delete" Margin="11,5,10,10" Click="DeleteCollection" Grid.Column="2" Grid.Row="1" Background="#FFF53A3A"/>
+        <Button Content="Search by all collections" Margin="10,6,124,10" Click="SearchButtonClick" Grid.Row="1" Background="#FF4BA9FF"/>
     </Grid>
 </Window>

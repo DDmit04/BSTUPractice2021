@@ -1,54 +1,214 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Program.FileSystem.Exceptions;
+using Program.userInterface;
 
 namespace Program
 {
     /// <summary>
     /// Логика взаимодействия для CollectionWindow.xaml
     /// </summary>
+    /// 
     public partial class CollectionWindow : Window
     {
-        public CollectionWindow()
+        private UserInterface UserInterface { get; }
+        private CollectionDefinition CollectionDefinition { get; }
+        private List<DataUnit> DataUnits { get; }
+
+        private DataUnit DataUnitBuffer { get; set; }
+        public CollectionWindow(CollectionDefinition collectionDefinition, List<DataUnit> dataUnits, UserInterface userInterface)
         {
+            CollectionDefinition = collectionDefinition;
+            UserInterface = userInterface;
+            DataUnits = dataUnits;
+
             InitializeComponent();
+
+            CollectionNameTexBox.Text = CollectionDefinition.Name;
+            DataUnitsList.ItemsSource = DataUnits;
+
+            DeleteRecordBtn.IsEnabled = false;
         }
 
 
-        private void CreateRecordClick(object sender, RoutedEventArgs e)
+        private void CreateRecord(object sender, RoutedEventArgs e)
         {
-            ListBox fieldsList = new ListBox();
-
-            TabItem tabItem = new TabItem{ Content = fieldsList, Header = "Record 3" };
-            records.Items.Add(tabItem);
+            try
+            {
+                var addedDataUnit = UserInterface.AddDataUnit(CollectionDefinition.Id);
+                DataUnits.Add(addedDataUnit);
+                RefreshDataUnitsList();
+            }
+            catch (Exception exception)
+            {
+                string logFilepath = ExceptionLogger.LogException(exception);
+                MainWindow.ShowErrorMessage("Error", "Error while adding new record!", logFilepath);
+            }
+            
         }
 
-        private void DeleteRecordClick(object sender, RoutedEventArgs e)
+        private void DeleteRecord(object sender, RoutedEventArgs e)
         {
-            records.Items.Remove(records.SelectedItem);
+            if (DataUnitsList.SelectedItem != null)
+            {
+                var dataUnitToDelete = (DataUnit)DataUnitsList.SelectedItem;
+                DataUnits.Remove(dataUnitToDelete);
+                try
+                {
+                    UserInterface.DeleteDataUnit(CollectionDefinition.Id, dataUnitToDelete.Id);
+                } 
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    MainWindow.ShowErrorMessage("Error", "Error while deleting record!", logFilepath);
+                    DataUnits.Add(dataUnitToDelete);
+                }
+                finally
+                {
+                    RefreshDataUnitsList();
+                }
+            }
+
         }
 
-        private void AddFieldClick(object sender, RoutedEventArgs e)
+        private void AddField(object sender, RoutedEventArgs e)
         {
-            TabItem selectedTabItem = records.SelectedItem as TabItem;
-            ListBox listBox = selectedTabItem.Content as ListBox;
-            StackPanel stackPanel = new StackPanel { Height = 70, Width = 463, Orientation = Orientation.Horizontal };
-            stackPanel.Children.Add(new TextBlock { Text = "color", Width = 163 });
-            stackPanel.Children.Add(new TextBlock { Text = "blue", Width = 163 });
+            var btn = (Button)sender;
+            var dataGrid = (Grid)btn.Parent;
+            DataUnitsList.SelectedItem = (DataUnit)dataGrid.DataContext;
+            var dataUnitToUpdate = (DataUnit)DataUnitsList.SelectedItem;
+            var newProp = new StringDataUnitProp("NewField", "NewValue");
+            dataUnitToUpdate.AddProperty(newProp);
+            try
+            {
+                UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnitToUpdate);
+            }
+            catch(Exception exception)
+            {
+                string logFilepath = ExceptionLogger.LogException(exception);
+                MainWindow.ShowErrorMessage("Error", "Error while adding new field!", logFilepath);
+                dataUnitToUpdate.RemoveProperty(newProp.Name);
+            }
+            finally
+            {
+                RefreshDataUnitsList();
+            }
+        }
 
-            listBox.Items.Add(stackPanel);
+        private void DeleteField(object sender, RoutedEventArgs e)
+        {
+            if (DataUnitsList.SelectedItem != null)
+            {
+                var dataUnitToUpdate = (DataUnit)DataUnitsList.SelectedItem;
+                var dataPropToDelete = (DataUnitProp)(sender as Button).DataContext;
+                dataUnitToUpdate.RemoveProperty(dataPropToDelete.Name);
+                try
+                {
+                    UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnitToUpdate);
+                }
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    MainWindow.ShowErrorMessage("Error", "Error while deleting field!", logFilepath);
+                    dataUnitToUpdate.AddProperty(dataPropToDelete);
+                } 
+                finally
+                {
+                    RefreshDataUnitsList();
+                }
+            }
+        }
+        private void DataGridCellLostFocus(object sender, RoutedEventArgs e)
+        {
+            var dataGridCell = sender as DataGridCell;
+            var editedProp = (DataUnitProp)dataGridCell.DataContext;
+            var editedPropIdValid = !string.IsNullOrEmpty(editedProp.Name.Trim()) && editedProp.Value != null;
+            if (editedPropIdValid)
+            {
+                var parent = VisualTreeHelper.GetParent(dataGridCell);
+                while (parent != null && parent.GetType() != typeof(DataGrid))
+                {
+                    parent = VisualTreeHelper.GetParent(parent);
+                }
 
+                var dataGrid = (DataGrid) parent;
+                var dataUnit = (DataUnit) dataGrid.DataContext;
+                if (DataUnitBuffer != null && !dataUnit.DeepEquals(DataUnitBuffer))
+                {
+                    try
+                    {
+                        UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnit);
+                        DataUnitBuffer = (DataUnit)SerializeUtils.DeepClone(dataUnit);
+                    }
+                    catch(Exception exception)
+                    {
+                        string logFilepath = ExceptionLogger.LogException(exception);
+                        MainWindow.ShowErrorMessage("Error", "Error while saving record!", logFilepath);
+                        DataUnits.Remove(dataUnit);
+                        DataUnits.Add(DataUnitBuffer);
+                    }
+                    finally
+                    {
+                        RefreshDataUnitsList();
+                    }
+                }
+            }
+        }
+        private void UpdateBthStates(object sender, RoutedEventArgs e)
+        {
+            UpdataBtnStates();
+        }
+        private void UpdataBtnStates()
+        {
+            if (DataUnitsList.SelectedItem == null)
+            {
+                DeleteRecordBtn.IsEnabled = false;
+            }
+            else
+            {
+                DeleteRecordBtn.IsEnabled = true;
+            }
+        }
+        private void RefreshDataUnitsList()
+        {
+            DataUnitsList.ItemsSource = null;
+            DataUnitsList.ItemsSource = DataUnits;
+        }
+        private void DataGridGotFocus(object sender, RoutedEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid.DataContext.GetType() == typeof(DataUnit))
+            {
+                var dataUnit = (DataUnit)dataGrid.DataContext;
+                DataUnitsList.SelectedItem = dataUnit;
+                DataUnitBuffer = (DataUnit)SerializeUtils.DeepClone(dataUnit);
+                UpdataBtnStates();
+            }
+        }
+
+        private void SearchByCollectionBtn_Click(object sender, RoutedEventArgs e)
+        {
+            SearchRequestWindow searchWindow = new SearchRequestWindow(UserInterface);
+            var dialogResult = searchWindow.ShowDialog().Value;
+            var dataUnits = new List<DataUnit>();
+            var searchProps = searchWindow.ReductedDataUnitProps;
+            if (dialogResult)
+            {
+                try
+                {
+                    dataUnits = UserInterface.SearchDataUnits(CollectionDefinition.Id, searchProps);
+                }
+                catch(Exception exception)
+                {
+                    string logFilepath = ExceptionLogger.LogException(exception);
+                    MainWindow.ShowErrorMessage("Error!", "Error while search data!", logFilepath);
+                }
+                var searchResultsWindow = new SearchResultsWindow(dataUnits);
+                searchResultsWindow.Show();
+            }
         }
     }
 }
-    
