@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Program.Controller.interfaces;
-using Program.DataPage;
 
 namespace Program.userInterface
 {
@@ -37,12 +36,12 @@ namespace Program.userInterface
             MainRepo.DeleteCollection(collectionId);
         }
 
-        public DataUnitsPaginator GetCollectionData(string collectionId, Comparison<DataUnit> sortFunc = null, int pageSize = 10)
+        public List<DataUnit> GetCollectionData(string collectionId, Comparison<DataUnit> sortFunc = null)
         {
             sortFunc ??= DefaultDataUnitsSort;
             var dataUnits = MainRepo.LoadCollectionData(collectionId);
             dataUnits.Sort(sortFunc);
-            return new DataUnitsPaginator(pageSize, dataUnits);
+            return dataUnits;
         }
 
         public DataUnit AddDataUnit(string collectionId)
@@ -60,7 +59,7 @@ namespace Program.userInterface
             MainRepo.DeleteDataUnit(collectionId, dataUnitId);
         }
 
-        public DataUnitsPaginator SearchDataUnits(string collectionId, List<DataUnitProp> searchFields, Comparison<DataUnit> sortFunc = null, int pageSize = 10)
+        public List<DataUnit> SearchDataUnits(string collectionId, List<DataUnitProp> searchFields, Comparison<DataUnit> sortFunc = null)
         {
             sortFunc ??= DefaultDataUnitsSort;
             var dataUnits = new List<DataUnit>();
@@ -73,10 +72,10 @@ namespace Program.userInterface
                 dataUnits = MainRepo.GetDataUnitsByProps(collectionId, searchFields);
             }
             dataUnits.Sort(sortFunc);
-            return new DataUnitsPaginator(pageSize, dataUnits);
+            return dataUnits;
         }
         
-        public DataUnitsPaginator SearchDataUnitsAllCollections(List<DataUnitProp> searchFields, Comparison<DataUnit> sortFunc = null, int pageSize = 10)
+        public List<DataUnit> SearchDataUnitsAllCollections(List<DataUnitProp> searchFields, Comparison<DataUnit> sortFunc = null)
         {
             sortFunc ??= DefaultDataUnitsSort;
             if (searchFields.Count == 0)
@@ -85,7 +84,7 @@ namespace Program.userInterface
             }
             var dataUnits = MainRepo.GetDataUnitsByPropsAllCollections(searchFields);
             dataUnits.Sort(sortFunc);
-            return new DataUnitsPaginator(pageSize, dataUnits);
+            return dataUnits;
         }
     }
 }
