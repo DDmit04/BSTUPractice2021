@@ -136,7 +136,7 @@ namespace Program
         }
 
         // root index
-        public IdIndex(int maxElements = 4) : this(DirUtils.GenerateFilename(), maxElements)
+        public IdIndex(int maxElements = 20) : this(DirUtils.GenerateFilename(), maxElements)
         {
         }
 
