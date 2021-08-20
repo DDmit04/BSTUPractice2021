@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace Program
@@ -104,6 +105,21 @@ namespace Program
             var dateBuffer = new byte[8];
             fileStream.Read(dateBuffer, 0, dateBuffer.Length);
             return BitConverter.ToInt64(dateBuffer);
+        }
+        public static object DeepClone(object obj)
+        {
+            object objResult = null;
+
+            using (var ms = new MemoryStream())
+            {
+                var bf = new BinaryFormatter();
+                bf.Serialize(ms, obj);
+
+                ms.Position = 0;
+                objResult = bf.Deserialize(ms);
+            }
+
+            return objResult;
         }
     }
 }

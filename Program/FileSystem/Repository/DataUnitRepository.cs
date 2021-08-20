@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Program.Controller.interfaces;
+using Program.FileSystem.Exceptions.dataUnit;
 using Program.FileSystem.Utils;
 using Program.userInterface;
 using Program.Utils;
@@ -30,7 +29,7 @@ namespace Program.Controller
             var resultList = new List<DataUnit>();
             foreach (var index in IndexRepository.AllIndexes)
             {
-                resultList.AddRange(GetDataUnitsByProps(index.CollectionId, props));
+                resultList.AddRange(GetDataUnitsByProps(index.Key, props));
             }
             return resultList;
         }
@@ -50,24 +49,34 @@ namespace Program.Controller
 
         public DataUnit SaveDataUnit(string collectionId, DataUnit dataUnit)
         {
-            var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnit.Id);
+            var filepath = IndexRepository.GetDataUnitFilepath(collectionId, dataUnit.Id);
             return DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
         }
         public DataUnit CreateDataUnit(string collectionId)
         {
             var id = IdUtils.GenerateDataUnitId();
+            var counter = 0;
+            while (IndexRepository.ContainsId(collectionId, id))
+            {
+                id = IdUtils.GenerateDataUnitId();
+                counter++;
+                if (counter == DbConfig.MAX_DATA_UNIT_ID_COLLISIONS)
+                {
+                    throw DataUnitIdCollisionException.GenerateException();
+                }
+            }
             var dataUnit = new DataUnit(id);
-            var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnit.Id);
+            var filepath = IndexRepository.GetDataUnitFilepath(collectionId, dataUnit.Id);
             var savedDataUnit = DataUnitDataSource.SaveDataUnit(filepath, dataUnit);
             try
             {
                 IndexRepository.BackupIndex(collectionId);
-                var indexToDivide = IndexRepository.AddDataUnit(collectionId, dataUnit.Id);
-                if (indexToDivide != null)
+                var indexDivideRequest = IndexRepository.AddDataUnit(collectionId, dataUnit.Id);
+                if (indexDivideRequest != null)
                 {
                     try
                     {
-                        DivideIndexByTwo(indexToDivide);
+                        DivideIndexByTwo(collectionId, indexDivideRequest);
                     }
                     catch
                     {
@@ -85,27 +94,14 @@ namespace Program.Controller
         }
         public void DeleteDataUnit(string collectionId, long dataUnitId)
         {
-            var filepath = IndexRepository.GetDataUnitIndexFilepath(collectionId, dataUnitId);
+            var filepath = IndexRepository.GetDataUnitFilepath(collectionId, dataUnitId);
             var dataUnitToDelete = DataUnitDataSource.LoadDataUnitsFromFile(filepath).Find(unit => unit.Id == dataUnitId);
             var dataUnitDeleted = DataUnitDataSource.DeleteDataUnit(filepath, dataUnitId);
             if (dataUnitDeleted)
             {
                 try
                 {
-                    IndexRepository.BackupIndex(collectionId);
-                    var indexToUnite = IndexRepository.RemoveDataUnit(collectionId, dataUnitId);
-                    if (indexToUnite != null)
-                    {
-                        try
-                        {
-                            UniteTwoIndex(indexToUnite);
-                        }
-                        catch
-                        {
-                            IndexRepository.LoadBackupOfIndex(collectionId);
-                            throw;
-                        }
-                    }
+                    IndexRepository.RemoveDataUnit(collectionId, dataUnitId);
                 }
                 catch
                 {
@@ -113,7 +109,6 @@ namespace Program.Controller
                     {
                         DataUnitDataSource.SaveDataUnit(filepath, dataUnitToDelete);
                     }
-
                     throw;
                 }
             }
@@ -129,7 +124,7 @@ namespace Program.Controller
             }
             catch
             {
-                IndexRepository.AddIndex(deletedIndex);
+                IndexRepository.AddIndex(collectionId, deletedIndex);
                 throw;
             }
         }
@@ -158,22 +153,10 @@ namespace Program.Controller
             }
             return resultSet;
         }
-        protected void DivideIndexByTwo(IdIndex indexToDivide)
+        protected void DivideIndexByTwo(string collectionId, IndexDivideRequest indexDivideRequest)
         {
-            var midId = IdUtils.GetMidLong(indexToDivide.Right.IdList.Max(), indexToDivide.Left.IdList.Min());
-            var dataFilepath = indexToDivide.GetFilepath();
-            var leftFilepath = indexToDivide.Left.GetFilepath();
-            var rightFilepath = indexToDivide.Right.GetFilepath();
-            DataUnitDataSource.DivideIndexDataByTwo(dataFilepath, leftFilepath, rightFilepath, midId);
-        }
-
-        protected void UniteTwoIndex(IdIndex indexToUnite)
-        {
-            var dataFilepath = indexToUnite.GetFilepath();
-            var dataPostfixIndex = dataFilepath.LastIndexOf(FileSystemConfig.DATA_FILE_POSTFIX, StringComparison.Ordinal);
-            var leftFilepath = dataFilepath.Insert(dataPostfixIndex, FileSystemConfig.LEFT_INDEX_POSTFIX);
-            var rightFilepath = dataFilepath.Insert(dataPostfixIndex, FileSystemConfig.RIGHT_INDEX_POSTFIX);
-            DataUnitDataSource.UniteDataIndex(dataFilepath, leftFilepath, rightFilepath);
+            var collectionFilepath = PathUtils.GetCollectionDataFilepath(collectionId);
+            DataUnitDataSource.DivideIndexDataByTwo(collectionFilepath, indexDivideRequest);
         }
     }
 }

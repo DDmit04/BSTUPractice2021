@@ -41,5 +41,10 @@ namespace Program.Utils
                 throw new Exception($"File to delete - {filepath} not exists!");
             }
         }
+
+        public static string GenerateFilename()
+        {
+            return DateTime.Now.Ticks + DbConfig.FILE_EXTENSION;
+        }
     }
 }

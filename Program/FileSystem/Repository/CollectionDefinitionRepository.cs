@@ -36,7 +36,7 @@ namespace Program.Controller
         }
         public CollectionDefinition CreateCollection(string collectionName)
         {
-            var colId = IdUtils.GenerateId();
+            var colId = IdUtils.GenerateCollectionId();
             var newColDef = new CollectionDefinition(colId, collectionName);
             CollectionDefDataSource.SaveCollectionDefinition(newColDef);
             return newColDef;

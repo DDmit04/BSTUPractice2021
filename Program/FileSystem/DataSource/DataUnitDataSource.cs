@@ -8,29 +8,23 @@ namespace Program
 {
     public class DataUnitDataSource : IDataUnitDataSource
     {
-        public void DivideIndexDataByTwo(string oldIndexFilepath, string newLeftIndexPath, string newRightIndexPath,
-            long divideId)
+        public void DivideIndexDataByTwo(string collectionFilepath, IndexDivideRequest indexDivideRequest)
         {
-            var dataUnits = LoadDataUnitsFromFile(oldIndexFilepath);
-            var loverUnits = dataUnits.Where(unit => unit.Id < divideId);
-            var upperUnits = dataUnits.Where(unit => unit.Id >= 0);
+            var fromFilepath = collectionFilepath + indexDivideRequest.FromFilename;
+            var dataUnits = LoadDataUnitsFromFile(fromFilepath);
+            foreach (var newIdsLocation in indexDivideRequest.ToFilenamesIds)
+            {
+                var filepath = collectionFilepath + newIdsLocation.Key;
+                var ids = newIdsLocation.Value;
+                var units = dataUnits.Where(unit => ids.Contains(unit.Id));
+                RewriteDataUnitsToFile(filepath, new List<DataUnit>(units));
+            }
+            if (indexDivideRequest.NeedDeleteFromFile)
+            {
+                DirUtils.DeleteFile(fromFilepath);
+            }
+        }
 
-            RewriteDataUnitsToFile(newLeftIndexPath, new List<DataUnit>(loverUnits));
-            RewriteDataUnitsToFile(newRightIndexPath, new List<DataUnit>(upperUnits));
-            DirUtils.DeleteFile(oldIndexFilepath);
-        }
-        
-        public void UniteDataIndex(string parentIndexFilepath, string leftIndexPath, string rightIndexPath)
-        {
-            var leftDataUnits = LoadDataUnitsFromFile(leftIndexPath);
-            var rightDataUnits = LoadDataUnitsFromFile(rightIndexPath);
-            var allDataUnits = new List<DataUnit>();
-            allDataUnits.AddRange(leftDataUnits);
-            allDataUnits.AddRange(rightDataUnits);
-            RewriteDataUnitsToFile(parentIndexFilepath, allDataUnits);
-            DirUtils.DeleteFile(leftIndexPath);
-            DirUtils.DeleteFile(rightIndexPath);
-        }
         public List<DataUnit> LoadDataUnitsFromFile(string filepath)
         {
             var fileExists = File.Exists(filepath);
@@ -53,17 +47,25 @@ namespace Program
 
         public DataUnit SaveDataUnit(string filepath, DataUnit dataUnit)
         {
-            var dataUnits = LoadDataUnitsFromFile(filepath);
-            var dataUnitToSave = dataUnits.Find(unit => unit.Id == dataUnit.Id);
-            if (dataUnitToSave != null)
+            var fileExists = File.Exists(filepath);
+            if (fileExists)
             {
-                dataUnits.Remove(dataUnitToSave);
-                dataUnits.Add(dataUnit);
-                RewriteDataUnitsToFile(filepath, dataUnits);
+                var dataUnits = LoadDataUnitsFromFile(filepath);
+                var dataUnitToSave = dataUnits.Find(unit => unit.Id == dataUnit.Id);
+                if (dataUnitToSave != null)
+                {
+                    dataUnits.Remove(dataUnitToSave);
+                    dataUnits.Add(dataUnit);
+                    RewriteDataUnitsToFile(filepath, dataUnits);
+                }
+                else
+                {
+                    AppendDataUnitToFile(filepath, dataUnit);
+                }
             }
             else
             {
-                AppendDataUnitToFile(filepath, dataUnit);
+                RewriteDataUnitsToFile(filepath, new List<DataUnit>(){dataUnit});
             }
             return dataUnit;
         }
@@ -81,7 +83,14 @@ namespace Program
             if (dataUnitToDelete != null)
             {
                 dataUnits.Remove(dataUnitToDelete);
-                RewriteDataUnitsToFile(filepath, dataUnits);
+                if (dataUnits.Count == 0)
+                {
+                    DirUtils.DeleteFile(filepath);
+                }
+                else
+                {
+                    RewriteDataUnitsToFile(filepath, dataUnits);
+                }
                 return true;
             }
             return false;

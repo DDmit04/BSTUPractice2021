@@ -4,11 +4,10 @@ namespace Program.userInterface
 {
     public interface IDataUnitIndexDataSource
     {
-        void UpdateIndexFile(IdIndex index);
-        public List<IdIndex> LoadIndexes(List<CollectionDefinition> colDefs);
-        void CreateIndex(string collectionId);
+        void UpdateIndexFile(string collectionId, IdIndex index);
+        public Dictionary<string, IdIndex> LoadRootIndexes(List<CollectionDefinition> colDefs);
         public void SaveIndexToFile(string filepath, IdIndex index);
-        IdIndex LoadIndexFromFile(string filepath, string collectionId);
+        IdIndex LoadRootIndexFromFile(string filepath, string collectionId);
 
     }
 }

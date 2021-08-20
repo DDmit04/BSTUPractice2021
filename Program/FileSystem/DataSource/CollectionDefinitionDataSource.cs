@@ -9,7 +9,7 @@ namespace Program.userInterface
     {
         public List<CollectionDefinition> LoadCollectionDefinitions()
         {
-            var filepath = FileSystemConfig.COLLECTION_DEFS_FILEPATH;
+            var filepath = DbConfig.COLLECTION_DEFS_FILEPATH;
             var fileExists = File.Exists(filepath);
             if (fileExists)
             {
@@ -43,12 +43,6 @@ namespace Program.userInterface
             }
             RewriteCollectionDefinitions(definitions);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="collectionId"></param>
-        /// <returns>Удалённая яколлекция</returns>
-        /// <exception cref="CollectionNotFoundException"></exception>
         public CollectionDefinition DeleteCollection(string collectionId)
         {
             var definitions = LoadCollectionDefinitions();
@@ -64,12 +58,12 @@ namespace Program.userInterface
 
         protected void RewriteCollectionDefinitions(List<CollectionDefinition> collectionDefinitions)
         {
-            var fileExists = File.Exists(FileSystemConfig.COLLECTION_DEFS_FILEPATH);
+            var fileExists = File.Exists(DbConfig.COLLECTION_DEFS_FILEPATH);
             if (!fileExists)
             {
-                DirUtils.CreateDirsForFile(FileSystemConfig.COLLECTION_DEFS_FILEPATH);
+                DirUtils.CreateDirsForFile(DbConfig.COLLECTION_DEFS_FILEPATH);
             }
-            using (var fileStream = new FileStream(FileSystemConfig.COLLECTION_DEFS_FILEPATH, FileMode.Create))
+            using (var fileStream = new FileStream(DbConfig.COLLECTION_DEFS_FILEPATH, FileMode.Create))
             {
                 var bytes = new List<byte>();
                 var defsCount = collectionDefinitions.Count;

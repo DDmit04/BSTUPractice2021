@@ -10,17 +10,18 @@ namespace Program
 {
     public class MainRepo : IMainRepo
     {
-        protected ICollectionDefDataSource CollectionDefDataSource;
-        protected IDataUnitDataSource DataUnitDataSource;
-        protected IDataUnitIndexDataSource DataUnitIndexDataSource;
-        protected IndexRepository IndexRepository;
-        protected  CollectionDefinitionRepository CollectionDefinitionRepository { get; }
-        protected  DataUnitRepository DataUnitRepository { get; }
+        protected readonly ICollectionDefDataSource CollectionDefDataSource;
+        protected readonly IDataUnitDataSource DataUnitDataSource;
+        protected readonly IDataUnitIndexDataSource DataUnitIndexDataSource;
+        protected readonly IndexRepository IndexRepository;
+        protected readonly CollectionDefinitionRepository CollectionDefinitionRepository;
+        protected readonly DataUnitRepository DataUnitRepository;
 
         public MainRepo()
         {
-            Directory.CreateDirectory(FileSystemConfig.COLLECTIONS_DATA_FILEPATH);
-            DirUtils.CreateDirsForFile(FileSystemConfig.COLLECTION_DEFS_FILEPATH);
+            Directory.CreateDirectory(DbConfig.COLLECTIONS_DATA_FILEPATH);
+            Directory.CreateDirectory(DbConfig.LOGS_FILEPATH);
+            DirUtils.CreateDirsForFile(DbConfig.COLLECTION_DEFS_FILEPATH);
             
             DataUnitDataSource = new DataUnitDataSource();
             DataUnitIndexDataSource = new DataUnitIndexDataSource();
