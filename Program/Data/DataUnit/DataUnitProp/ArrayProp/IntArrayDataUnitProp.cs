@@ -5,6 +5,7 @@ using System.IO;
 
 namespace Program
 {
+    [Serializable]
     public class IntArrayDataUnitProp : DataUnitProp
     {
         public IntArrayDataUnitProp(string name, List<int> value) : base(name, value, DataType.IntArray)

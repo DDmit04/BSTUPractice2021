@@ -10,12 +10,6 @@ namespace Program
         public string Name { get; set; }
         public DateTime CreationDate { get; }
 
-        public CollectionDefinition(string name)
-        {
-            Id = null;
-            Name = name;
-        }
-
         public CollectionDefinition(string id, string name)
         {
             Id = id;

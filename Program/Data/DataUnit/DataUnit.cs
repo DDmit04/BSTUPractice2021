@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Program
 {
+    [Serializable]
     public class DataUnit : IComparable
     {
         public long Id { get; }
@@ -55,9 +56,10 @@ namespace Program
             return Props.Count >= propsToMatch.Count & matches;
         }
 
-        public void RemoveProperty(string propName)
+        public bool RemoveProperty(string propName)
         {
-            Props.RemoveAll(prop => prop.Name == propName);
+            var removedProps = Props.RemoveAll(prop => prop.Name == propName);
+            return removedProps > 0;
         }
         public void Update(List<DataUnitProp> updatedProps)
         {
@@ -130,7 +132,7 @@ namespace Program
         }
         protected bool Equals(DataUnit other)
         {
-            return Id == other.Id;
+            return Id == other.Id && CreationTime == other.CreationTime;
         }
         public override bool Equals(object obj)
         {
@@ -155,6 +157,35 @@ namespace Program
             {
                 return -1;
             }
+        }
+
+        public bool DeepEquals(DataUnit other)
+        {
+            var otherProps = new HashSet<DataUnitProp>(other.Props);
+            var resProps = new HashSet<DataUnitProp>(Props);
+            resProps.ExceptWith(otherProps);
+            return Equals(other) && resProps.Count == 0;
+        }
+
+        public override string ToString()
+        {
+            var resStr = "{\n\t";
+            resStr += Id.ToString();
+            if (Props.Count > 0)
+            {
+                resStr += ",\n\t";
+                DataUnitProp prop;
+                for (var i = 0; i < Props.Count - 1; i++)
+                {
+                    prop = Props[i];
+                    resStr += prop.ToString();
+                    resStr += ",\n\t";
+                }
+                prop = Props[Props.Count - 1];
+                resStr += prop.ToString();
+            }
+            resStr += "\n}";
+            return resStr;
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Program
 {
+    [Serializable]
     public class IntDataUnitProp : DataUnitProp
     {
         public IntDataUnitProp(string name, int value) : base(name, value, DataType.Integer)

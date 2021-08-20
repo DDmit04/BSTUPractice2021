@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Program
 {
+    [Serializable]
     public class ObjectDataUnitProp : DataUnitProp
     {
         public ObjectDataUnitProp(string name, DataUnit value) : base(name, value, DataType.Object)
@@ -12,6 +14,7 @@ namespace Program
         public ObjectDataUnitProp(FileStream fileStream) : base(fileStream, DataType.Object)
         {
         }
+
 
         protected override List<byte> SerializeValue()
         {
