@@ -12,6 +12,11 @@ namespace Program
         public DateTime CreationTime { get; }
         public DataType Type { get; }
 
+        public bool IsValid
+        {
+            get => !string.IsNullOrEmpty(Name.Trim()) && Value != null;
+        }
+
         public DataUnitProp(string name, object value, DataType type)
         {
             Name = name;

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using Program.FileSystem.Exceptions;
 using Program.userInterface;
 
@@ -12,7 +13,7 @@ namespace Program
     /// Логика взаимодействия для CollectionWindow.xaml
     /// </summary>
     /// 
-    public partial class CollectionWindow : Window
+    public partial class CollectionWindow
     {
         private UserInterface UserInterface { get; }
         private CollectionDefinition CollectionDefinition { get; }
@@ -33,7 +34,30 @@ namespace Program
             DeleteRecordBtn.IsEnabled = false;
         }
 
-
+        private void CollectionWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            if (DataUnitBuffer != null)
+            {
+                var unsavedDataUnit =
+                    DataUnits.Find(unit => unit.Id == DataUnitBuffer.Id && !unit.DeepEquals(DataUnitBuffer));
+                if (unsavedDataUnit != null)
+                {
+                    var allPropsIsValid = unsavedDataUnit.Props.All(prop => prop.IsValid);
+                    if (allPropsIsValid)
+                    {
+                        try
+                        {
+                            UserInterface.UpdateDataUnit(CollectionDefinition.Id, unsavedDataUnit);
+                        }
+                        catch (Exception exception)
+                        {
+                            var logFilepath = ExceptionLogger.LogException(exception);
+                            MainWindow.ShowErrorMessage("Error", "Error while saving record!", logFilepath);
+                        }
+                    }
+                }
+            }
+        }
         private void CreateRecord(object sender, RoutedEventArgs e)
         {
             try
@@ -47,7 +71,7 @@ namespace Program
                 string logFilepath = ExceptionLogger.LogException(exception);
                 MainWindow.ShowErrorMessage("Error", "Error while adding new record!", logFilepath);
             }
-            
+
         }
 
         private void DeleteRecord(object sender, RoutedEventArgs e)
@@ -59,8 +83,8 @@ namespace Program
                 try
                 {
                     UserInterface.DeleteDataUnit(CollectionDefinition.Id, dataUnitToDelete.Id);
-                } 
-                catch(Exception exception)
+                }
+                catch (Exception exception)
                 {
                     string logFilepath = ExceptionLogger.LogException(exception);
                     MainWindow.ShowErrorMessage("Error", "Error while deleting record!", logFilepath);
@@ -86,7 +110,7 @@ namespace Program
             {
                 UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnitToUpdate);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 string logFilepath = ExceptionLogger.LogException(exception);
                 MainWindow.ShowErrorMessage("Error", "Error while adding new field!", logFilepath);
@@ -109,57 +133,58 @@ namespace Program
                 {
                     UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnitToUpdate);
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     string logFilepath = ExceptionLogger.LogException(exception);
                     MainWindow.ShowErrorMessage("Error", "Error while deleting field!", logFilepath);
                     dataUnitToUpdate.AddProperty(dataPropToDelete);
-                } 
+                }
                 finally
                 {
                     RefreshDataUnitsList();
                 }
             }
         }
-        private void DataGridCellLostFocus(object sender, RoutedEventArgs e)
+        private void DataGridCellLostFocus(object sender, DataGridRowEditEndingEventArgs e)
         {
-            var dataGridCell = sender as DataGridCell;
-            var editedProp = (DataUnitProp)dataGridCell.DataContext;
-            var editedPropIdValid = !string.IsNullOrEmpty(editedProp.Name.Trim()) && editedProp.Value != null;
-            if (editedPropIdValid)
+            if (IsLoaded)
             {
-                var parent = VisualTreeHelper.GetParent(dataGridCell);
-                while (parent != null && parent.GetType() != typeof(DataGrid))
+                var dataGrid = (DataGrid)sender;
+                var dataUnit = (DataUnit)dataGrid.DataContext;
+                var editedProp = (DataUnitProp)e.Row.DataContext;
+                var editedPropIdValid = !string.IsNullOrEmpty(editedProp.Name.Trim()) && editedProp.Value != null;
+                if (editedPropIdValid)
                 {
-                    parent = VisualTreeHelper.GetParent(parent);
+                    if (DataUnitBuffer != null && !dataUnit.DeepEquals(DataUnitBuffer))
+                    {
+                        try
+                        {
+                            UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnit);
+                            DataUnitBuffer = (DataUnit) SerializeUtils.DeepClone(dataUnit);
+                        }
+                        catch (Exception exception)
+                        {
+                            e.Cancel = true;
+                            var logFilepath = ExceptionLogger.LogException(exception);
+                            MainWindow.ShowErrorMessage("Error", "Error while saving record!", logFilepath);
+                            ReplaceDataUnitInList(dataUnit, DataUnitBuffer);
+                            RefreshDataUnitsList();
+                        }
+                    }
                 }
-
-                var dataGrid = (DataGrid) parent;
-                var dataUnit = (DataUnit) dataGrid.DataContext;
-                if (DataUnitBuffer != null && !dataUnit.DeepEquals(DataUnitBuffer))
+                else
                 {
-                    try
-                    {
-                        UserInterface.UpdateDataUnit(CollectionDefinition.Id, dataUnit);
-                        DataUnitBuffer = (DataUnit)SerializeUtils.DeepClone(dataUnit);
-                    }
-                    catch(Exception exception)
-                    {
-                        string logFilepath = ExceptionLogger.LogException(exception);
-                        MainWindow.ShowErrorMessage("Error", "Error while saving record!", logFilepath);
-                        DataUnits.Remove(dataUnit);
-                        DataUnits.Add(DataUnitBuffer);
-                    }
-                    finally
-                    {
-                        RefreshDataUnitsList();
-                    }
+                    e.Cancel = true;
+                    ReplaceDataUnitInList(dataUnit, DataUnitBuffer);
+                    RefreshDataUnitsList();
                 }
             }
         }
-        private void UpdateBthStates(object sender, RoutedEventArgs e)
+        public void ReplaceDataUnitInList(DataUnit dataUnitToReplace, DataUnit replacement)
         {
-            UpdataBtnStates();
+            var index = DataUnits.IndexOf(dataUnitToReplace);
+            DataUnits.Remove(dataUnitToReplace);
+            DataUnits.Insert(index, replacement);
         }
         private void UpdataBtnStates()
         {
@@ -201,12 +226,12 @@ namespace Program
                 {
                     dataUnits = UserInterface.SearchDataUnits(CollectionDefinition.Id, searchProps);
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     string logFilepath = ExceptionLogger.LogException(exception);
                     MainWindow.ShowErrorMessage("Error!", "Error while search data!", logFilepath);
                 }
-                var searchResultsWindow = new SearchResultsWindow(dataUnits);
+                var searchResultsWindow = new SearchResultsWindow(dataUnits, CollectionDefinition.Name);
                 searchResultsWindow.Show();
             }
         }

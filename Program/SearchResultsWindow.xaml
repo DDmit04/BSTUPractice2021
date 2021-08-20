@@ -15,7 +15,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBlock x:Name="SearchResultsTexBox" Margin="10,0,10,0" Text="Search results" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="20" FontWeight="DemiBold"/>
+        <TextBlock Name="SearchResultsTexBox" Margin="10,0,10,0" Text="Search results" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="20" FontWeight="DemiBold"/>
         <Separator Margin="-11,4,-18,1" RenderTransformOrigin="0.5,0.5" Grid.Row="1">
             <Separator.RenderTransform>
                 <TransformGroup>

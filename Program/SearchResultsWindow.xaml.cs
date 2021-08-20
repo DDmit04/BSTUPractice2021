@@ -9,11 +9,16 @@ namespace Program
     public partial class SearchResultsWindow : Window
     {
         private List<DataUnit> DataUnits { get; }
-        public SearchResultsWindow(List<DataUnit> dataUnits)
+        public SearchResultsWindow(List<DataUnit> dataUnits, string collectionName = "")
         {
             DataUnits = dataUnits;
 
             InitializeComponent();
+
+            if(!string.IsNullOrEmpty(collectionName))
+            {
+                SearchResultsTexBox.Text += $" (Collection: {collectionName})";
+            }
 
             DataUnitsList.ItemsSource = DataUnits;
         }

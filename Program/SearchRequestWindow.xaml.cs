@@ -42,7 +42,7 @@ namespace Program
             var editedProp = dataGridCell.DataContext as DataUnitProp;
             if (editedProp != null)
             {
-                var editedPropIdValid = PropIsValid(editedProp);
+                var editedPropIdValid = editedProp.IsValid;
                 if (!editedPropIdValid)
                 {
                     dataGridCell.BorderThickness = new Thickness(2, 2, 2, 2);
@@ -68,7 +68,7 @@ namespace Program
         }
         private void SearchBtn_Click(object sender, RoutedEventArgs e)
         {
-            var resProps = ReductedDataUnitProps.Where(prop => PropIsValid(prop));
+            var resProps = ReductedDataUnitProps.Where(prop => prop.IsValid);
             if(resProps.Count() < ReductedDataUnitProps.Count())
             {
                 var res = System.Windows.Forms.MessageBox.Show("Some of the props are invalid. Start search witout them?", "Warning!" ,MessageBoxButtons.YesNo);
@@ -84,10 +84,6 @@ namespace Program
                 DialogResult = true;
                 Close();
             }
-        }
-        private bool PropIsValid(DataUnitProp prop)
-        {
-            return !string.IsNullOrEmpty(prop.Name.Trim()) && prop.Value != null;
         }
         private void RefreshPropsGrid()
         {

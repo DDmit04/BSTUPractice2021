@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
+        Closing="CollectionWindow_OnClosing"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Title="CollectionWindow" Height="708" Width="620">
     <Grid>
@@ -47,7 +48,7 @@
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                        <DataGrid Grid.Row="1" GotFocus="DataGridGotFocus" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
+                        <DataGrid Grid.Row="1" RowEditEnding="DataGridCellLostFocus"  GotFocus="DataGridGotFocus" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
                             <DataGrid.Style>
                                 <Style TargetType="DataGrid">
                                     <Style.Triggers>
@@ -57,14 +58,9 @@
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.Style>
-                            <DataGrid.CellStyle>
-                                <Style TargetType="{x:Type DataGridCell}">
-                                    <EventSetter Event="LostFocus" Handler="DataGridCellLostFocus"/>
-                                </Style>
-                            </DataGrid.CellStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Width="8*" Binding="{Binding Name}"  FontSize="17"/>
-                                <DataGridTextColumn Header="Value" Width="8*" Binding="{Binding Value}" FontSize="17"/>
+                                <DataGridTextColumn Header="Name" Width="8*" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"  FontSize="17"/>
+                                <DataGridTextColumn Header="Value" Width="8*" Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" FontSize="17"/>
                                 <DataGridTemplateColumn Width="4*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -82,6 +78,6 @@
         </ListView>
         <Button x:Name="CreateRecordBtn" Content="Create Record" Margin="43,17,10,11" Click="CreateRecord" Grid.Column="1" RenderTransformOrigin="0.438,0.201" Background="#FF4BA9FF"/>
         <Button x:Name="DeleteRecordBtn" Content="Delete Record" Margin="0,17,0,11" Click="DeleteRecord" Grid.Column="2" Background="#FFF53A3A" HorizontalAlignment="Center" Width="104"/>
-        <Button x:Name="SearchByCollectionBtn" Content="Search by collection" Margin="146,2,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Click="SearchByCollectionBtn_Click"/>
+        <Button Content="Search by collection" Margin="137,8,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Width="104"/>
     </Grid>
 </Window>

@@ -87,11 +87,11 @@ namespace Program
         }
         public void UpdateProperty(DataUnitProp dataUnitProp)
         {
-            SetProperty(dataUnitProp.Name, dataUnitProp);
+            SetProperty(dataUnitProp.CreationTime, dataUnitProp);
         }
-        public void SetProperty(string oldName, DataUnitProp dataUnitProp)
+        public void SetProperty(DateTime dateTime, DataUnitProp dataUnitProp)
         {
-            var propToUpdate = GetProperty(oldName);
+            var propToUpdate = Props.First(prop => prop.CreationTime == dateTime);
             if (propToUpdate != null && dataUnitProp.Name != null)
             {
                 Props.Remove(propToUpdate);
