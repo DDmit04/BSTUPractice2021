@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
-using Program.userInterface;
 
 namespace Program
 {
@@ -13,12 +12,10 @@ namespace Program
     /// </summary>
     public partial class SearchRequestWindow : Window
     {
-        private UserInterface UserInterface { get; }
         public List<DataUnitProp> ReductedDataUnitProps { get; protected set; }
 
-        public SearchRequestWindow(UserInterface userInterface)
+        public SearchRequestWindow()
         {
-            UserInterface = userInterface;
 
             InitializeComponent();
 

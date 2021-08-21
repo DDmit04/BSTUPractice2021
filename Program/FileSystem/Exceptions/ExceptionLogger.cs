@@ -9,7 +9,7 @@ namespace Program.FileSystem.Exceptions
         {
             var logFolder = DbConfig.LOGS_FILEPATH;
             var logExtension = DbConfig.LOGS_EXTENSION;
-            string newLogFilePath = logFolder + "exception_" + GetLogDate() + logExtension;
+            var newLogFilePath = logFolder + "exception_" + GetLogDate() + logExtension;
             newLogFilePath = WriteToLog(newLogFilePath, exception, additionalInfo);
             return newLogFilePath;
         }
@@ -18,7 +18,7 @@ namespace Program.FileSystem.Exceptions
         { 
             var logFolder = DbConfig.LOGS_FILEPATH;
             var logExtension = DbConfig.LOGS_EXTENSION;
-            string newLogFilePath = logFolder + "warning_" + GetLogDate() + logExtension;
+            var newLogFilePath = logFolder + "warning_" + GetLogDate() + logExtension;
             newLogFilePath = WriteToLog(newLogFilePath, exception, additionalInfo);
             return newLogFilePath;
         }
@@ -28,7 +28,7 @@ namespace Program.FileSystem.Exceptions
             try
             {
                 File.Create(filepath).Dispose();
-                using (StreamWriter writer = File.AppendText(filepath))
+                using (var writer = File.AppendText(filepath))
                 {
                     if (additionalInfo != "")
                     {

@@ -216,7 +216,7 @@ namespace Program
 
         private void SearchByCollectionBtn_Click(object sender, RoutedEventArgs e)
         {
-            SearchRequestWindow searchWindow = new SearchRequestWindow(UserInterface);
+            SearchRequestWindow searchWindow = new SearchRequestWindow();
             var dialogResult = searchWindow.ShowDialog().Value;
             var dataUnits = new List<DataUnit>();
             var searchProps = searchWindow.ReductedDataUnitProps;

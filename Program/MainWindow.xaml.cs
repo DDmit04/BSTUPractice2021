@@ -95,10 +95,14 @@ namespace Program
                 var deletingCollection = (CollectionDefinition)CollectionsList.SelectedItem;
                 try
                 {
-                    UserInterface.DeleteCollection(CollectionDefinitions[CollectionsList.Items.IndexOf(CollectionsList.SelectedItem)].Id);
-                    ShowInfoMessage("Success!", "Collection was deleted.");
-                    CollectionDefinitions.Remove(deletingCollection);
-                    RefreshListBoxData();
+                    var res = System.Windows.Forms.MessageBox.Show("Are you sure you want to delete the collection?", "Warning!", System.Windows.Forms.MessageBoxButtons.YesNo);
+                    if (res == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        UserInterface.DeleteCollection(CollectionDefinitions[CollectionsList.Items.IndexOf(CollectionsList.SelectedItem)].Id);
+                        ShowInfoMessage("Success!", "Collection was deleted.");
+                        CollectionDefinitions.Remove(deletingCollection);
+                        RefreshListBoxData();
+                    }
                 } 
                 catch(Exception exception)
                 {
@@ -145,7 +149,7 @@ namespace Program
 
         private void SearchButtonClick(object sender, RoutedEventArgs e)
         {
-            SearchRequestWindow searchWindow = new SearchRequestWindow(UserInterface);
+            SearchRequestWindow searchWindow = new SearchRequestWindow();
             var dialogResult = searchWindow.ShowDialog().Value;
             var dataUnits = new List<DataUnit>();
             var searchProps = searchWindow.ReductedDataUnitProps;

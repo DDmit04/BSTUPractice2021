@@ -30,7 +30,6 @@
                 </TransformGroup>
             </Separator.RenderTransform>
         </Separator>
-
         <ListView Name="DataUnitsList" Margin="10,4,10,9" Grid.ColumnSpan="3" BorderBrush="Black" Grid.Row="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -48,7 +47,7 @@
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                        <DataGrid Grid.Row="1" RowEditEnding="DataGridCellLostFocus"  GotFocus="DataGridGotFocus" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
+                        <DataGrid Grid.Row="1" RowEditEnding="DataGridCellLostFocus" GotFocus="DataGridGotFocus" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
                             <DataGrid.Style>
                                 <Style TargetType="DataGrid">
                                     <Style.Triggers>
@@ -76,8 +75,8 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Button x:Name="CreateRecordBtn" Content="Create Record" Margin="43,17,10,11" Click="CreateRecord" Grid.Column="1" RenderTransformOrigin="0.438,0.201" Background="#FF4BA9FF"/>
-        <Button x:Name="DeleteRecordBtn" Content="Delete Record" Margin="0,17,0,11" Click="DeleteRecord" Grid.Column="2" Background="#FFF53A3A" HorizontalAlignment="Center" Width="104"/>
-        <Button Content="Search by collection" Margin="137,8,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Width="104"/>
+        <Button Name="CreateRecordBtn" Content="Create Record" Margin="43,17,10,11" Click="CreateRecord" Grid.Column="1" RenderTransformOrigin="0.438,0.201" Background="#FF4BA9FF"/>
+        <Button Name="DeleteRecordBtn" Content="Delete Record" Margin="0,17,0,11" Click="DeleteRecord" Grid.Column="2" Background="#FFF53A3A" HorizontalAlignment="Center" Width="104"/>
+        <Button Content="Search by collection" Click="SearchByCollectionBtn_Click" Margin="137,8,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Width="104"/>
     </Grid>
 </Window>

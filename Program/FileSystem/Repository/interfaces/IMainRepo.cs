@@ -10,7 +10,6 @@ namespace Program.Controller.interfaces
         public DataUnit CreateDataUnit(string collectionId);
         public DataUnit UpdateDataUnit(string collectionId, DataUnit dataUnit);
         public void DeleteDataUnit(string collectionId, long dataUnitId);
-
         public List<CollectionDefinition> LoadCollectionDefinitions();
         public CollectionDefinition RenameCollection(string collectionId, string newCollectionName);
         public CollectionDefinition CreateCollection(string collectionName);

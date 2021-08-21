@@ -43,7 +43,7 @@
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                        <DataGrid Grid.Row="1" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" Width="{Binding ElementName=DataUnitsList, Path=ActualWidth}" ItemsSource="{Binding Props}" HeadersVisibility="None">
+                        <DataGrid Grid.Row="1" x:Name="DatGrid" BorderBrush="Black" AutoGenerateColumns="False" ItemsSource="{Binding Props}" HeadersVisibility="None">
                             <DataGrid.Style>
                                 <Style TargetType="DataGrid">
                                     <Style.Triggers>

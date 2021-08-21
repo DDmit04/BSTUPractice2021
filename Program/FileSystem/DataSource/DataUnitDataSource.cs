@@ -70,12 +70,6 @@ namespace Program
             return dataUnit;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="filepath"></param>
-        /// <param name="dataUnitId"></param>
-        /// <returns>Запись была удалена</returns>
         public bool DeleteDataUnit(string filepath, long dataUnitId)
         {
             var dataUnits = LoadDataUnitsFromFile(filepath);

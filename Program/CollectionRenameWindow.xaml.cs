@@ -10,7 +10,7 @@ namespace Program
     public partial class CollectionRenameWindow : Window
     {
         public string collectionNewName { get; protected set; }
-        public string oldCollectionName { get; protected set; }
+        public string oldCollectionName { get; }
         public CollectionRenameWindow(string collectionName)
         {
             InitializeComponent();
@@ -19,7 +19,6 @@ namespace Program
             NewCollectionNameTextBox.Focus();
             NewCollectionNameTextBox.SelectionStart = 0;
             NewCollectionNameTextBox.SelectionLength = NewCollectionNameTextBox.Text.Length;
-            NewCollectionNameTextBox.KeyDown += new KeyEventHandler(TextBox_KeyDown);
             OkBtn.IsEnabled = false;
         }
 

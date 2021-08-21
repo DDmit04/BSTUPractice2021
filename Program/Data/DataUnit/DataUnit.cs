@@ -89,9 +89,9 @@ namespace Program
         {
             SetProperty(dataUnitProp.CreationTime, dataUnitProp);
         }
-        public void SetProperty(DateTime dateTime, DataUnitProp dataUnitProp)
+        public void SetProperty(DateTime unitCreationDateTime, DataUnitProp dataUnitProp)
         {
-            var propToUpdate = Props.First(prop => prop.CreationTime == dateTime);
+            var propToUpdate = Props.First(prop => prop.CreationTime == unitCreationDateTime);
             if (propToUpdate != null && dataUnitProp.Name != null)
             {
                 Props.Remove(propToUpdate);
