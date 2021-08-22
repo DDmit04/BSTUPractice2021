@@ -49,7 +49,7 @@ namespace Program
                 var matchingProp = GetProperty(searchField.Name);
                 if (matchingProp != null)
                 {
-                    return matchingProp.Value.Equals(searchField.Value);
+                    return matchingProp.Value.Equals(searchField.Value) || searchField.Value.Equals(DbConfig.ANY_STRING_MATCHER);
                 }
                 return false;
             });
@@ -89,9 +89,9 @@ namespace Program
         {
             SetProperty(dataUnitProp.CreationTime, dataUnitProp);
         }
-        public void SetProperty(DateTime unitCreationDateTime, DataUnitProp dataUnitProp)
+        public void SetProperty(DateTime dateTime, DataUnitProp dataUnitProp)
         {
-            var propToUpdate = Props.First(prop => prop.CreationTime == unitCreationDateTime);
+            var propToUpdate = Props.First(prop => prop.CreationTime == dateTime);
             if (propToUpdate != null && dataUnitProp.Name != null)
             {
                 Props.Remove(propToUpdate);

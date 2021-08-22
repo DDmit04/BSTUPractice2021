@@ -15,5 +15,6 @@ namespace Program
         public static readonly string LOGS_FILEPATH = DB_FILEPATH + "logs/";
         public static readonly string LOGS_EXTENSION = ".txt";
         public static readonly int MAX_DATA_UNIT_ID_COLLISIONS = (int) Math.Pow(10, 6);
+        public static readonly string ANY_STRING_MATCHER = "\"\"";
     }
 }
