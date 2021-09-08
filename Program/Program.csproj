@@ -4,11 +4,17 @@
     <UseWPF>true</UseWPF>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>appIco.ico</ApplicationIcon>
     
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.0.0" />
 <Content Include="obj\Debug\net5.0-windows\CollectionWindow.baml" />
       <Content Include="obj\Debug\net5.0-windows\MainWindow.baml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appIco.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
