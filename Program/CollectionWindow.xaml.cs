@@ -145,6 +145,17 @@ namespace Program
                 }
             }
         }
+        private void SelectChanged(object sender, EventArgs e)
+        {
+            var listView = (ListView)sender;
+            var dataUnit = (DataUnit)listView.SelectedItem;
+            if (dataUnit != null)
+            {
+                DataUnitsList.SelectedItem = dataUnit;
+                DataUnitBuffer = (DataUnit)SerializeUtils.DeepClone(dataUnit);
+                UpdataBtnStates();
+            }
+        }
         private void DataGridCellLostFocus(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (IsLoaded)
