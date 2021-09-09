@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
+using Application = System.Windows.Application;
 
 namespace Program
 {
@@ -18,7 +19,7 @@ namespace Program
         {
 
             InitializeComponent();
-
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             ReductedDataUnitProps = new List<DataUnitProp>();
             ReductedDataUnitProps.Add(new StringDataUnitProp("Search name", "Search value"));
             ReductedDataUnitProps.Add(new StringDataUnitProp("Search name", "Search value"));
@@ -49,15 +50,9 @@ namespace Program
         }
         private void DataCellGotFocus(object sender, RoutedEventArgs e)
         {
-            var dataGridCell = sender as DataGridCell;
-            var parent = VisualTreeHelper.GetParent(dataGridCell);
-            while (parent != null && parent.GetType() != typeof(DataGrid))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            var dataGrid = (DataGrid)parent;
-            var selectedRowIndex = dataGrid.SelectedIndex;
-            if (selectedRowIndex == ReductedDataUnitProps.Count - 1)
+            DataGridCellInfo cell = ReductingDataUnitGrid.CurrentCell;
+            int rowIndex = ReductingDataUnitGrid.Items.IndexOf(cell.Item);
+            if (rowIndex == ReductedDataUnitProps.Count - 1)
             {
                 ReductedDataUnitProps.Add(new StringDataUnitProp("Search name", "Search value"));
                 RefreshPropsGrid();

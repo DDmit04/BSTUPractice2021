@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Program"
         mc:Ignorable="d"
         Title="CollectionRenameWindow" Height="207" Width="354">
-    <Grid>
+    <Grid KeyDown="UserKeyDown">
         <Grid.RowDefinitions>
             <RowDefinition Height="95*"/>
             <RowDefinition Height="44*"/>

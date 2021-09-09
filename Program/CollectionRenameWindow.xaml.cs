@@ -9,12 +9,13 @@ namespace Program
     /// </summary>
     public partial class CollectionRenameWindow : Window
     {
-        public string collectionNewName { get; protected set; }
-        public string oldCollectionName { get; }
+        public string CollectionNewName { get; protected set; }
+        public string OldCollectionName { get; }
         public CollectionRenameWindow(string collectionName)
         {
             InitializeComponent();
-            oldCollectionName = collectionName;
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            OldCollectionName = collectionName;
             NewCollectionNameTextBox.Text = collectionName;
             NewCollectionNameTextBox.Focus();
             NewCollectionNameTextBox.SelectionStart = 0;
@@ -33,11 +34,16 @@ namespace Program
             Close();
         }
 
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        private void UserKeyDown(object sender, KeyEventArgs e)
         {
             if (OkBtn.IsEnabled && e.Key == Key.Enter)
             {
                 SaveNewName();
+            }
+            else if(e.Key == Key.Escape)
+            {
+                DialogResult = false;
+                Close();
             }
         }
 
@@ -45,12 +51,12 @@ namespace Program
         {
             if (IsLoaded)
             {
-                collectionNewName = NewCollectionNameTextBox.Text;
-                if (collectionNewName.Trim().Length == 0)
+                CollectionNewName = NewCollectionNameTextBox.Text;
+                if (CollectionNewName.Trim().Length == 0)
                 {
                     OkBtn.IsEnabled = false;
                 }
-                else if (collectionNewName == oldCollectionName)
+                else if (CollectionNewName == OldCollectionName)
                 {
                     OkBtn.IsEnabled = false;
                 }
@@ -62,7 +68,7 @@ namespace Program
         }
         private void SaveNewName()
         {
-            collectionNewName = NewCollectionNameTextBox.Text;
+            CollectionNewName = NewCollectionNameTextBox.Text;
             DialogResult = true;
         }
     }

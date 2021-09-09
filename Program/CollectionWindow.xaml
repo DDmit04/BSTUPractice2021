@@ -77,6 +77,6 @@
         </ListView>
         <Button Name="CreateRecordBtn" Content="Create Record" Margin="43,17,10,11" Click="CreateRecord" Grid.Column="1" RenderTransformOrigin="0.438,0.201" Background="#FF4BA9FF"/>
         <Button Name="DeleteRecordBtn" Content="Delete Record" Margin="0,17,0,11" Click="DeleteRecord" Grid.Column="2" Background="#FFF53A3A" HorizontalAlignment="Center" Width="104"/>
-        <Button Content="Search by collection" Click="SearchByCollectionBtn_Click" Margin="137,8,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.ColumnSpan="2" Grid.Column="1" Width="104"/>
+        <Button Content="Search by collection" Click="SearchByCollectionBtn_Click" Margin="146,4,10,0" Grid.Row="3" Height="35" VerticalAlignment="Top" Background="#FF4BA9FF" Grid.Column="1" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

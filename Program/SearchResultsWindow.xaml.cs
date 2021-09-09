@@ -14,6 +14,7 @@ namespace Program
             DataUnits = dataUnits;
 
             InitializeComponent();
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             if(!string.IsNullOrEmpty(collectionName))
             {

@@ -27,6 +27,7 @@ namespace Program
             DataUnits = dataUnits;
 
             InitializeComponent();
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             CollectionNameTexBox.Text = CollectionDefinition.Name;
             DataUnitsList.ItemsSource = DataUnits;

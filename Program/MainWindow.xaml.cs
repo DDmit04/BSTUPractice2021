@@ -27,7 +27,7 @@ namespace Program
 
             CollectionsList.ItemsSource = CollectionDefinitions;
             CollectionsList.SelectionChanged += new SelectionChangedEventHandler(UpdateBthStates);
-            UpdataBtnStates();
+            UpdateBtnStates();
         }
 
         private void RefreshCollectionList()
@@ -49,14 +49,13 @@ namespace Program
             var renameCollectionDialog = new CollectionRenameWindow("");
             if (renameCollectionDialog.ShowDialog().Value)
             {
-                var newCollectionName = renameCollectionDialog.collectionNewName;
+                var newCollectionName = renameCollectionDialog.CollectionNewName;
                 if (newCollectionName.Trim().Length != 0)
                 {
                     try
                     {
                         var newCollection = UserInterface.CreateCollection(newCollectionName);
                         CollectionDefinitions.Add(newCollection);
-                        ShowInfoMessage("Success!", "New collection was created.");
                         RefreshListBoxData();
                     }
                     catch(Exception exception)
@@ -99,7 +98,6 @@ namespace Program
                     if (res == System.Windows.Forms.DialogResult.Yes)
                     {
                         UserInterface.DeleteCollection(CollectionDefinitions[CollectionsList.Items.IndexOf(CollectionsList.SelectedItem)].Id);
-                        ShowInfoMessage("Success!", "Collection was deleted.");
                         CollectionDefinitions.Remove(deletingCollection);
                         RefreshListBoxData();
                     }
@@ -122,13 +120,12 @@ namespace Program
                 var renameCollectionDialog = new CollectionRenameWindow(renamingCollection.Name);
                 if (renameCollectionDialog.ShowDialog().Value)
                 {
-                    var newCollectionName = renameCollectionDialog.collectionNewName;
+                    var newCollectionName = renameCollectionDialog.CollectionNewName;
                     if (newCollectionName.Trim().Length != 0 && newCollectionName != renamingCollection.Name)
                     {
                         try
                         {
                             UserInterface.RenameCollection(renamingCollection.Id, newCollectionName);
-                            ShowInfoMessage("Success!", "Collection name was changed.");
                             var index = CollectionDefinitions.FindIndex(col => col.Id == renamingCollection.Id);
                             CollectionDefinitions.Remove(renamingCollection);
                             renamingCollection.Name = newCollectionName;
@@ -171,7 +168,7 @@ namespace Program
 
         private void UpdateBthStates(object sender, RoutedEventArgs e)
         {
-            UpdataBtnStates();
+            UpdateBtnStates();
         }
 
         public static void ShowInfoMessage(string title, string body)
@@ -196,7 +193,7 @@ namespace Program
             }
             MessageBox.Show(body, title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        private void UpdataBtnStates()
+        private void UpdateBtnStates()
         {
             if (CollectionsList.SelectedItem == null)
             {
